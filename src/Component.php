@@ -41,7 +41,7 @@ class Component extends AbstractComponent
     public function define($id, $value = null)
     {
         $this->checkLock();
-        $this->lastDefinition = $this->definitions[] = new Definition($id, $this);
+        $this->lastDefinition = $this->definitions[] = new Definition($id);
         $this->methods[ComponentMethodNaming::getter($this->lastDefinition)] = function () use ($id) {
             return $this->values[$id];
         };

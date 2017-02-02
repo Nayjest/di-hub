@@ -2,28 +2,26 @@
 
 namespace Nayjest\DI;
 
+use Nayjest\DI\Internal\Definition;
+
 class ComponentDefinitions
 {
     private $definitions;
-    /**
-     * @var Component
-     */
-    private $component;
+
     /**
      * @var array
      */
     private $extensions;
 
-    public function __construct(array &$definitions, array &$extensions, Component $component)
+    public function __construct(array &$definitions, array &$extensions)
     {
         $this->definitions = &$definitions;
-        $this->component = $component;
-        $this->extensions = $extensions;
+        $this->extensions = &$extensions;
     }
 
-    public function define($id, $localId = null)
+    public function define($id)
     {
-        $definition = new Definition($id, $this->component, $localId);
+        $definition = new Definition($id);
         $this->definitions[$id] = $definition;
         return new DefinitionBuilder($definition);
     }

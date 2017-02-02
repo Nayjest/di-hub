@@ -4,8 +4,9 @@ namespace Nayjest\DI\Test;
 
 use Nayjest\DI\CustomComponent;
 use Nayjest\DI\Hub;
+use PHPUnit\Framework\TestCase;
 
-class CustomComponentTest extends \PHPUnit\Framework\TestCase
+class CustomComponentTest extends TestCase
 {
     /** @var  Hub */
     private $hub;
@@ -114,21 +115,20 @@ class CustomComponentTest extends \PHPUnit\Framework\TestCase
 
     public function testTrackBy()
     {
-        $val1 = (object)['val' => 1];
-        $val2 = (object)['val' => 2];
+        $src = (object)['val' => 'initialSrc'];
+        $receiver = (object)['trackedVal' => 'initialTrackedVal'];
         $this->c
-            ->define('val1', $val1)
-            ->usedBy('val2', function($val2, $newVal1) {
-                $val2->trackedVal = $newVal1->val;
+            ->define('src', $src)
+            ->usedBy('receiver', function($receiver, $src) {
+                $receiver->trackedVal = $src->val;
             })
             ->withSetter()
-            ->define('val2', $val2);
+            ->define('receiver', $receiver);
         $this->register();
-        $this->assertEquals(1, $this->hub->get('val1')->val);
-        $this->assertEquals(2, $this->hub->get('val2')->val);
-        $this->assertEquals(1, $this->hub->get('val2')->trackedVal);
-        $this->c->setVal1((object)['val' => 3]);
-        $this->assertEquals(3, $this->hub->get('val2')->trackedVal);
+        $this->assertEquals('initialSrc', $this->hub->get('src')->val);
+        $this->assertEquals('initialSrc', $this->hub->get('receiver')->trackedVal);
+        $this->c->setSrc((object)['val' => 'updatedSrc']);
+        $this->assertEquals('updatedSrc', $this->hub->get('receiver')->trackedVal);
     }
 
     public function testTrackCollection()

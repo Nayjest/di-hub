@@ -1,7 +1,13 @@
 <?php
 
-namespace Nayjest\DI;
+namespace Nayjest\DI\Internal;
 
+use Nayjest\DI\Internal\Definition;
+
+/**
+ * Class ComponentMethodNaming
+ * @internal
+ */
 class ComponentMethodNaming
 {
     private function __construct()
@@ -25,5 +31,4 @@ class ComponentMethodNaming
     {
         return 'push' . ucfirst($d->localId ?: $d->id) . 'To' . ucfirst($trackedById);
     }
-
 }

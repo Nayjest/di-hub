@@ -2,6 +2,8 @@
 
 namespace Nayjest\DI;
 
+use Nayjest\DI\Internal\Definition;
+
 class DefinitionBuilder
 {
     /**
@@ -23,14 +25,13 @@ class DefinitionBuilder
 
     public function usedBy($id, $method = null)
     {
-        //$method = $method ?: ComponentMethodNaming::trackedBy($this->definition, $id);
-        $this->definition->trackedBy[$id] = $method;
+        $this->definition->usedBy[$id] = $method;
         return $this;
     }
 
     public function uses($id, $method = null)
     {
-        $this->definition->tracks[$id] = $method;// ?: ComponentMethodNaming::tracks($this->definition, $id);
+        $this->definition->uses[$id] = $method;
         return $this;
     }
 

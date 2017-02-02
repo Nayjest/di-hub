@@ -3,6 +3,8 @@
 namespace Nayjest\DI;
 
 use BadMethodCallException;
+use Nayjest\DI\Internal\ComponentMethodNaming;
+use Nayjest\DI\Internal\Definition;
 
 class CustomComponent extends Component
 {
@@ -60,7 +62,7 @@ class CustomComponent extends Component
         $this->checkLock();
         $methodName = ComponentMethodNaming::trackedBy($this->lastDefinition, $id);
         $this->methods[$methodName] = $func;
-        $this->lastDefinition->trackedBy[$id] = $methodName;
+        $this->lastDefinition->usedBy[$id] = $methodName;
         return $this;
     }
 
@@ -68,7 +70,7 @@ class CustomComponent extends Component
     {
         $methodName = ComponentMethodNaming::tracks($this->lastDefinition, $id);
         $this->methods[$methodName] = $func;
-        $this->lastDefinition->tracks[$id] =  $methodName;
+        $this->lastDefinition->uses[$id] =  $methodName;
         return $this;
     }
 
@@ -81,10 +83,10 @@ class CustomComponent extends Component
             if ($src->hasSetter) {
                 $d->withSetter();
             }
-            foreach(array_keys($src->trackedBy) as $id) {
+            foreach(array_keys($src->usedBy) as $id) {
                 $d->usedBy($id);
             }
-            foreach(array_keys($src->tracks) as $id) {
+            foreach(array_keys($src->uses) as $id) {
                 $d->uses($id);
             }
         }

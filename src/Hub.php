@@ -1,42 +1,28 @@
 <?php
 namespace Nayjest\DI;
+use Nayjest\DI\Internal\Definition;
+use Nayjest\DI\Internal\Item;
+
 class Hub
 {
     /**
      * @var Definition[]
      */
-    private $definitions = [];
     private $extensions = [];
-    private $initialized = [];
-    private $trackStack = [];
 
-    protected function isUsedByInitializedItems(Definition $definition)
-    {
-        foreach(array_keys($this->initialized) as $id) {
-            if (
-            $this->definitions[$id]->uses($definition->id)
-                || $definition->isUsedBy($id)
-            ) {
-                return true;
-            }
-        }
-        return false;
-    }
+    /**
+     * @var Item[]
+     */
+    private $items = [];
 
-    protected function registerDefinition(Definition $definition)
-    {
-        $id = $definition->id;
-        if ($this->has($id)) {
-            throw new \Exception("Can't redefine $id");
-        }
-        $this->definitions[$id] = $definition;
-        $definition->handler = new DefinitionHandler($definition);
-
-        // initialize immediately if definition used by initialized items
-        if ($this->isUsedByInitializedItems($definition)) {
-            $this->initialize($id);
-        }
-    }
+    /**
+     * Adds component to hub.
+     *
+     * @api
+     * @param Component $component
+     * @return $this
+     * @throws \Exception
+     */
     public function add(Component $component)
     {
         $definitions = [];
@@ -44,51 +30,75 @@ class Hub
         $component->register(
             new ComponentDefinitions(
                 $definitions,
-                $extensions,
-                $component
+                $extensions
             )
         );
         $component->setHub($this);
-
-        // merge extensions
-        foreach ($extensions as $id) {
-            if (!array_key_exists($id, $this->extensions)) {
-                $this->extensions[$id] = [];
-            }
-            $this->extensions[$id][] = $component;
-        }
-
-        // merge definitions
+        $this->registerExtensions($extensions, $component);
         foreach ($definitions as $definition) {
-            $this->registerDefinition($definition);
+            $this->registerDefinition($definition, $component);
         }
         return $this;
     }
 
-    public function has($id)
-    {
-        return array_key_exists($id, $this->definitions);
-    }
-
-    protected function hasInitialized($id)
-    {
-        return array_key_exists($id, $this->initialized);
-    }
-
+    /**
+     * Returns item by ID.
+     * Throws exception if item isn't defined.
+     *
+     * @api
+     * @param string $id
+     * @return mixed
+     * @throws \Exception
+     */
     public function get($id)
     {
         $this->checkDefinitionExistence($id);
         if (!$this->hasInitialized($id)) {
             $this->initialize($id);
         }
-        return $this->initialized[$id];
+        return $this->items[$id]->getValue();
     }
 
+    /**
+     * Set's tem value.
+     * Throws exception if item isn't defined or has no setter.
+     *
+     * @api
+     * @param string $id
+     * @param mixed $value
+     * @return $this
+     * @throws \Exception
+     */
     public function set($id, $value)
     {
         $this->checkDefinitionExistence($id);
-        $this->definitions[$id]->set($value);
+        $this->items[$id]->set($value);
         return $this;
+    }
+
+    /**
+     * Returns true if hub contains item with specified ID, otherwise returns false.
+     *
+     * @api
+     * @param string $id
+     * @return bool
+     */
+    public function has($id)
+    {
+        return array_key_exists($id, $this->items);
+    }
+
+    public function update($id)
+    {
+        if ($this->hasInitialized($id)) {
+            $this->initialize($id);
+        }
+        return $this;
+    }
+
+    protected function hasInitialized($id)
+    {
+        return $this->items[$id]->isInitialized();
     }
 
     protected function checkDefinitionExistence($id)
@@ -98,95 +108,104 @@ class Hub
         }
     }
 
-    public function update($id)
-    {
-        if ($this->hasInitialized($id)) {
-            \dump("reinitialize $id");
-            $this->initialize($id);
-        } else {
-            \dump("no reinitialize $id required");
-        }
-        return $this;
-    }
-
-
     protected function initialize($id)
     {
-        $old = $this->hasInitialized($id) ? $this->initialized[$id] : null;
-        $this->initialized[$id] = $this->definitions[$id]->handler->get();
+        $item = $this->items[$id];
+        $old = $item->isInitialized() ? $item->getValue() : null;
+        $item->initializeValue();
         $this->extend($id);
         $this->trackTo($id);
-        $this->trackFrom($id, $this->initialized[$id], $old);
+        $this->trackFrom($id, $old);
+    }
+
+    /**
+     * @return Item[]
+     */
+    protected function getInitializedItems()
+    {
+        $res = [];
+        foreach($this->items as $id => $item) {
+            if ($item->isInitialized()) {
+                $res[$id] = $item;
+            }
+        }
+        return $res;
+    }
+
+    protected function isUsedByInitializedItems($id)
+    {
+        $item = $this->items[$id];
+        foreach($this->getInitializedItems() as $otherId => $otherItem) {
+            if ($otherItem->uses($id) || $item->usedBy($otherId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected function registerDefinition(Definition $definition, ComponentInterface $component)
+    {
+        $id = $definition->id;
+        if ($this->has($id)) {
+            throw new \Exception("Can't redefine $id");
+        }
+        $this->items[$id] = new Item($definition, $component);
+
+        // initialize immediately if definition used by initialized items
+        if ($this->isUsedByInitializedItems($id)) {
+            $this->initialize($id);
+        }
+    }
+
+    protected function registerExtensions(array $extensions, ComponentInterface $component)
+    {
+        // merge extensions
+        foreach ($extensions as $id) {
+            if (!array_key_exists($id, $this->extensions)) {
+                $this->extensions[$id] = [];
+            }
+            $this->extensions[$id][] = $component;
+        }
     }
 
     protected function trackTo($id)
     {
-        $definition = $this->definitions[$id];
-        foreach (array_keys($definition->tracks) as $trackedId) {
-            if (!$this->hasInitialized($trackedId)) {
+        $item = $this->items[$id];
+        foreach ($item->getUsedIds() as $otherId) {
+            if (!$this->hasInitialized($otherId)) {
                 // will call trackFrom
-                $this->get($trackedId);
+                $this->get($otherId);
             } else {
-                $this->trackStack[] = "to($id)-i:$id.?$trackedId";
-                $definition->trackFrom(
-                    $trackedId,
-                    $this->initialized[$id],
-                    $this->initialized[$trackedId],
-                    null
-                );
+                $item->useItem($otherId, $this->get($otherId), null);
             }
         }
 
-        foreach ($this->definitions as $definition) {
-            if (array_key_exists($id, $definition->trackedBy)) {
-                if (!$this->hasInitialized($definition->id)) {
+        foreach ($this->items as $otherId => $otherItem) {
+            if ($otherItem->usedBy($id)) {
+                if (!$this->hasInitialized($otherId)) {
                     // will call trackFrom
-                    $this->get($definition->id);
+                    $this->get($otherId);
                 } else {
-                    $this->trackStack[] = "to($id)-e:{$definition->id}.$id";
-                    $definition->trackTo(
-                        $id,
-                        $this->initialized[$id],
-                        $this->initialized[$definition->id],
-                        null
-                    );
+                    $otherItem->useItByItem($id, $this->get($id));
                 }
             }
         }
     }
 
-    protected function trackFrom($id, $value, $prevValue)
+    protected function trackFrom($id, $prevValue)
     {
-        $definition = $this->definitions[$id];
-        foreach ($definition->trackedBy as $trackedBy => $method) {
-            if (!$this->hasInitialized($trackedBy)) {
+        $item = $this->items[$id];
+        foreach ($item->getUsedByIds() as $otherId) {
+            if (!$this->hasInitialized($otherId)) {
                 continue;
             }
-            $this->trackStack[] = "from($id)-i:$id.$trackedBy";
-            $definition->trackTo($trackedBy, $this->initialized[$trackedBy], $value, $prevValue);
-//            if ($method === null) {
-//                $method = ComponentMethodNaming::trackedBy($definition, $trackedBy);
-//            }
-//            $definition->component->{$method}(
-//                $this->initialized[$trackedBy],
-//                $value,
-//                $prevValue
-//            );
+            $item->useItByItem($otherId, $this->get($otherId), $prevValue);
         };
-        foreach ($this->definitions as $definition) {
+        foreach ($this->items as $otherId => $otherItem) {
             if (
-                array_key_exists($id, $definition->tracks)
-                && $this->hasInitialized($definition->id)
+                $otherItem->uses($id) && $this->hasInitialized($otherId)
             ) {
-                $this->trackStack[] = "from($id)-e:.$id.{$definition->id}";
-                $definition->trackFrom($id, $this->initialized[$definition->id], $value, $prevValue);
-                /*
-                $definition->component->{$definition->tracks[$id]}(
-                    $this->initialized[$definition->id],
-                    $value,
-                    $prevValue
-                );
-                */
+                $otherItem->useItem($id, $this->get($id), $prevValue);
             }
         }
     }
@@ -196,18 +215,10 @@ class Hub
         if (!array_key_exists($id, $this->extensions)) {
             return;
         }
-        $item = $this->initialized[$id];
+        $value = $this->items[$id]->getValue();
         foreach ($this->extensions[$id] as $component) {
             $method = 'extend' . ucfirst($id);
-            $component->$method($item);
+            $component->$method($value);
         }
-    }
-
-    public function onReplace($id, $from, $to)
-    {
-    }
-
-    public function onModify($id)
-    {
     }
 }

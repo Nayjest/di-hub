@@ -2,9 +2,7 @@
 
 namespace Nayjest\DI;
 
-use Exception;
-
-abstract class Component
+abstract class Component implements ComponentInterface
 {
     /** @var  Hub */
     protected $hub;
@@ -18,7 +16,6 @@ abstract class Component
     protected function notifyHub($id)
     {
         if($this->hub) {
-            \dump("do hub update {$id}");
             $this->hub->update($id);
         }
     }

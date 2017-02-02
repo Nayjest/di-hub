@@ -1,9 +1,23 @@
 {
     "name": "nayjest/di-hub",
+    "description": "Dependency injection library for PHP with links consistency maintaining mechanism",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "dependency injection",
+        "DI",
+        "IoC",
+        "IoC container",
+        "DI container",
+        "service locator",
+        "service provider",
+        "inversion of control",
+    ],
     "authors": [
         {
-            "name": "v.stepanenko",
-            "email": "mail@vitaliy.in"
+            "name": "Vitalii [Nayjest] Stepanenko",
+            "email": "mail@vitaliy.in",
+            "role": "Developer"
         }
     ],
     "autoload": {
@@ -18,13 +32,23 @@
         }
     },
     "require": {
-        "symfony/var-dumper": "^3.2"
+        "php": "^5.5||^7",
+        "container-interop/container-interop": "^1.1"
     },
     "require-dev": {
-        "phpunit/phpunit": "^5.7"
+        "phpunit/phpunit": "^5.7",
+        "symfony/var-dumper": "^3.2"
+    },
+    "provide": {
+        "container-interop/container-interop-implementation": "^1.1"
     },
     "scripts": {
         "test": "php vendor/phpunit/phpunit/phpunit",
         "unit-test": "php vendor/phpunit/phpunit/phpunit --testsuite unit"
+    },
+    "support": {
+        "email": "mail@vitaliy.in",
+        "source": "https://github.com/Nayjest/di-hub",
+        "issues": "https://github.com/Nayjest/di-hub/issues"
     }
 }

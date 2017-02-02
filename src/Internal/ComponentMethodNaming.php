@@ -2,23 +2,19 @@
 
 namespace Nayjest\DI\Internal;
 
-use Nayjest\DI\Internal\Definition;
-
 /**
  * Class ComponentMethodNaming
  * @internal
  */
 class ComponentMethodNaming
 {
-    private function __construct()
+    public static function getter(Definition $d)
     {
-    }
-
-    public static function getter(Definition $d) {
         return 'get' . ucfirst($d->localId ?: $d->id);
     }
 
-    public static function setter(Definition $d) {
+    public static function setter(Definition $d)
+    {
         return 'set' . ucfirst($d->localId ?: $d->id);
     }
 
@@ -30,5 +26,10 @@ class ComponentMethodNaming
     public static function trackedBy(Definition $d, $trackedById)
     {
         return 'push' . ucfirst($d->localId ?: $d->id) . 'To' . ucfirst($trackedById);
+    }
+
+    public static function extend($id)
+    {
+        return 'extend' . ucfirst($id);
     }
 }

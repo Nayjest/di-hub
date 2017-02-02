@@ -1,5 +1,6 @@
 <?php
 namespace Nayjest\DI;
+
 use Nayjest\DI\Internal\Definition;
 use Nayjest\DI\Internal\Item;
 
@@ -19,11 +20,11 @@ class Hub
      * Adds component to hub.
      *
      * @api
-     * @param Component $component
+     * @param ComponentInterface $component
      * @return $this
      * @throws \Exception
      */
-    public function add(Component $component)
+    public function add(ComponentInterface $component)
     {
         $definitions = [];
         $extensions = [];
@@ -124,7 +125,7 @@ class Hub
     protected function getInitializedItems()
     {
         $res = [];
-        foreach($this->items as $id => $item) {
+        foreach ($this->items as $id => $item) {
             if ($item->isInitialized()) {
                 $res[$id] = $item;
             }
@@ -135,7 +136,7 @@ class Hub
     protected function isUsedByInitializedItems($id)
     {
         $item = $this->items[$id];
-        foreach($this->getInitializedItems() as $otherId => $otherItem) {
+        foreach ($this->getInitializedItems() as $otherId => $otherItem) {
             if ($otherItem->uses($id) || $item->usedBy($otherId)) {
                 return true;
             }

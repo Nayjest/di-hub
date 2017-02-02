@@ -2,7 +2,7 @@
 
 namespace Nayjest\DI\Test;
 
-use Nayjest\DI\CustomComponent;
+use Nayjest\DI\Component;
 use Nayjest\DI\Hub;
 use PHPUnit\Framework\TestCase;
 
@@ -10,12 +10,13 @@ class CustomComponentTest extends TestCase
 {
     /** @var  Hub */
     private $hub;
-    /** @var  CustomComponent */
+    /** @var  Component */
     private $c;
+
     public function setUp()
     {
         $this->hub = new Hub();
-        $this->c = new CustomComponent();
+        $this->c = new Component();
     }
 
     protected function register()
@@ -24,18 +25,45 @@ class CustomComponentTest extends TestCase
         return $this;
     }
 
+    /**
+     * @param string $key
+     * @param mixed $value
+     * @return $this
+     */
     protected function assertEq($key, $value)
     {
         $this->assertEquals($value, $this->hub->get($key));
         return $this;
     }
 
+    public function testConstruct()
+    {
+        $this->assertInstanceOf(Component::class, new Component());
+    }
+
+    public function testMake()
+    {
+        $this->assertInstanceOf(Component::class, Component::make());
+    }
+
+    public function testExtend()
+    {
+        $hub = new Hub();
+        $hub->add(
+        Component::make()
+            ->extend('obj', function($obj) {
+                $obj->val = 'updated_value';
+            })
+            ->define('obj', (object)['val' => 'initial_value'])
+        );
+        $this->assertEquals('updated_value', $hub->get('obj')->val);
+    }
+
     public function testSimpleGet()
     {
         $this->c
             ->define('prop1', 1)
-            ->define('secondProperty', 2)
-        ;
+            ->define('secondProperty', 2);
         $this
             ->register()
             ->assertEq("prop1", 1)
@@ -46,8 +74,7 @@ class CustomComponentTest extends TestCase
     {
         $this->c
             ->define('prop1')
-            ->withSetter()
-        ;
+            ->withSetter();
         $this->c->setProp1(1);
         $this
             ->register()
@@ -83,10 +110,9 @@ class CustomComponentTest extends TestCase
     {
         $this->c
             ->define('prop1')
-            ->withSetter(function($val) {
+            ->withSetter(function ($val) {
                 return $val . '!';
-            })
-        ;
+            });
         $this->c->setProp1('1');
 
         $this
@@ -102,7 +128,7 @@ class CustomComponentTest extends TestCase
         $val2 = (object)['val' => 2];
         $this->c
             ->define('val1', $val1)->withSetter()
-            ->define('val2', $val2)->uses('val1', function($val2, $newVal1) {
+            ->define('val2', $val2)->uses('val1', function ($val2, $newVal1) {
                 $val2->trackedVal = $newVal1->val;
             });
         $this->register();
@@ -119,7 +145,7 @@ class CustomComponentTest extends TestCase
         $receiver = (object)['trackedVal' => 'initialTrackedVal'];
         $this->c
             ->define('src', $src)
-            ->usedBy('receiver', function($receiver, $src) {
+            ->usedBy('receiver', function ($receiver, $src) {
                 $receiver->trackedVal = $src->val;
             })
             ->withSetter()
@@ -136,7 +162,7 @@ class CustomComponentTest extends TestCase
         $obj1 = (object)['val' => 1];
         $obj2 = (object)['val' => 2];
         $collection = (object)['items' => []];
-        $injector = function($col, $newVal, $oldVal) {
+        $injector = function ($col, $newVal, $oldVal) {
             if (
                 $oldVal
                 && ($oldVal !== $newVal)
@@ -150,11 +176,11 @@ class CustomComponentTest extends TestCase
         };
         $this->c
             ->define('obj1', $obj1)
-                ->usedBy('collection', $injector)
-                ->withSetter()
+            ->usedBy('collection', $injector)
+            ->withSetter()
             ->define('obj2', $obj2)
-                ->usedBy('collection', $injector)
-                ->withSetter()
+            ->usedBy('collection', $injector)
+            ->withSetter()
             ->define('collection', $collection);
         $this->register();
 
@@ -165,9 +191,9 @@ class CustomComponentTest extends TestCase
         $this->c->setObj1(null);
 
         // Adding object to already initialized collection
-        $res = $this->hub->get('collection');
+        $this->hub->get('collection');
         $obj3 = (object)['val' => 3];
-        $this->hub->add((new CustomComponent())
+        $this->hub->add((new Component())
             ->define('obj3', $obj3)
             ->usedBy('collection', $injector)
             ->withSetter()
@@ -175,7 +201,7 @@ class CustomComponentTest extends TestCase
         $res = $this->hub->get('collection')->items;
 
         $this->assertEquals(2, count($res));
-        foreach($res as $item) {
+        foreach ($res as $item) {
             $this->assertTrue(in_array($item->val, ['2c', 3], true));
         }
     }

@@ -35,11 +35,6 @@ class Item
         return $this->initialized;
     }
 
-    public function hasSetter()
-    {
-        return $this->definition->hasSetter;
-    }
-
     public function usedBy($id)
     {
         return in_array($id, array_keys($this->definition->usedBy));

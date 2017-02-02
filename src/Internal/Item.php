@@ -3,6 +3,7 @@
 namespace Nayjest\DI\Internal;
 
 use Nayjest\DI\ComponentInterface;
+use Nayjest\DI\Exception\ReadonlyException;
 
 /**
  * Class Item
@@ -68,7 +69,7 @@ class Item
     public function set($value)
     {
         if (!$this->definition->hasSetter) {
-            throw new \Exception("Setting {$this->definition->id} is not possible, setter is not defined");
+            throw new ReadonlyException("Can't modify {$this->definition->id}, setter is not defined.");
         }
         if ($this->definition->setter === null) {
             $this->definition->setter = ComponentMethodNaming::setter($this->definition);

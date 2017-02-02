@@ -1,10 +1,14 @@
 <?php
 namespace Nayjest\DI;
 
+use Interop\Container\ContainerInterface;
+use Nayjest\DI\Exception\AlreadyDefinedException;
+use Nayjest\DI\Exception\NotFoundException;
+use Nayjest\DI\Internal\ComponentMethodNaming;
 use Nayjest\DI\Internal\Definition;
 use Nayjest\DI\Internal\Item;
 
-class Hub
+class Hub implements ContainerInterface
 {
     /**
      * @var Component[][]
@@ -105,7 +109,7 @@ class Hub
     protected function checkDefinitionExistence($id)
     {
         if (!$this->has($id)) {
-            throw new \Exception("has no $id");
+            throw new NotFoundException("Item '$id' not found.");
         }
     }
 
@@ -148,7 +152,7 @@ class Hub
     {
         $id = $definition->id;
         if ($this->has($id)) {
-            throw new \Exception("Can't redefine $id");
+            throw new AlreadyDefinedException("Can't define '$id'. Item already defined");
         }
         $this->items[$id] = new Item($definition, $component);
 
@@ -219,7 +223,7 @@ class Hub
         }
         $value = $this->items[$id]->getValue();
         foreach ($this->extensions[$id] as $component) {
-            $method = 'extend' . ucfirst($id);
+            $method = ComponentMethodNaming::extend($id);
             $component->$method($value);
         }
     }

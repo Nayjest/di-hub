@@ -2,7 +2,8 @@
 
 namespace Nayjest\DI;
 
-use BadMethodCallException;
+use Nayjest\DI\Exception\BadMethodCallException;
+use Nayjest\DI\Exception\DefinitionLockException;
 use Nayjest\DI\Internal\ComponentMethodNaming;
 use Nayjest\DI\Internal\Definition;
 
@@ -34,7 +35,9 @@ class Component extends AbstractComponent
     protected function checkLock()
     {
         if ($this->isLocked) {
-            throw new \Exception("Can't modify definitions after registering component");
+            throw new DefinitionLockException(
+                "Can't modify definitions after registering component."
+            );
         }
     }
 

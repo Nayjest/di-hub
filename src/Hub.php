@@ -7,7 +7,7 @@ use Nayjest\DI\Internal\Item;
 class Hub
 {
     /**
-     * @var Definition[]
+     * @var Component[][]
      */
     private $extensions = [];
 

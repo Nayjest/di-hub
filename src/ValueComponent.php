@@ -2,7 +2,7 @@
 
 namespace Nayjest\DI;
 
-class ValueAbstractComponent extends AbstractComponent
+class ValueComponent extends AbstractComponent
 {
     /**
      * @var

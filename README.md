@@ -1,6 +1,8 @@
 # DI-Hub (Dependency Injection Hub)
 IoC container for PHP with links consistency maintaining mechanism
 
+[![Build Status](https://travis-ci.org/Nayjest/di-hub.svg?branch=master)](https://travis-ci.org/Nayjest/di-hub)
+
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/2d3bd038-0411-4ba7-be25-82a823e90f76/big.png)](https://insight.sensiolabs.com/projects/2d3bd038-0411-4ba7-be25-82a823e90f76)
 
 ## Table of Contents

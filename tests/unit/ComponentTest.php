@@ -6,7 +6,7 @@ use Nayjest\DI\Component;
 use Nayjest\DI\Hub;
 use PHPUnit\Framework\TestCase;
 
-class CustomComponentTest extends TestCase
+class ComponentTest extends TestCase
 {
     /** @var  Hub */
     private $hub;

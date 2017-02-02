@@ -172,23 +172,24 @@ class Hub
     protected function trackTo($id)
     {
         $item = $this->items[$id];
+
         foreach ($item->getUsedIds() as $otherId) {
-            if (!$this->hasInitialized($otherId)) {
-                // will call trackFrom
-                $this->get($otherId);
-            } else {
-                $item->useItem($otherId, $this->get($otherId), null);
+            if ($this->hasInitialized($otherId)) {
+                $item->useItem($otherId, $this->get($otherId));
+                continue;
             }
+            // will call trackFrom
+            $this->get($otherId);
         }
 
         foreach ($this->items as $otherId => $otherItem) {
             if ($otherItem->usedBy($id)) {
-                if (!$this->hasInitialized($otherId)) {
-                    // will call trackFrom
-                    $this->get($otherId);
-                } else {
+                if ($this->hasInitialized($otherId)) {
                     $otherItem->useItByItem($id, $this->get($id));
+                    continue;
                 }
+                // will call trackFrom
+                $this->get($otherId);
             }
         }
     }
@@ -196,12 +197,14 @@ class Hub
     protected function trackFrom($id, $prevValue)
     {
         $item = $this->items[$id];
+
         foreach ($item->getUsedByIds() as $otherId) {
             if (!$this->hasInitialized($otherId)) {
                 continue;
             }
             $item->useItByItem($otherId, $this->get($otherId), $prevValue);
         };
+
         foreach ($this->items as $otherId => $otherItem) {
             if ($otherItem->uses($id) && $this->hasInitialized($otherId)) {
                 $otherItem->useItem($id, $this->get($id), $prevValue);

@@ -30,7 +30,7 @@ composer require nayjest/di-hub
 
 ## Testing
 
-This application bundled with unit tests (PHPUnit).
+This package bundled with unit tests (PHPUnit).
 
 1) Install nayjest/di-hub as stand-alone project
 

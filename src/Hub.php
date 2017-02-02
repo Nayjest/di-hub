@@ -203,9 +203,7 @@ class Hub
             $item->useItByItem($otherId, $this->get($otherId), $prevValue);
         };
         foreach ($this->items as $otherId => $otherItem) {
-            if (
-                $otherItem->uses($id) && $this->hasInitialized($otherId)
-            ) {
+            if ($otherItem->uses($id) && $this->hasInitialized($otherId)) {
                 $otherItem->useItem($id, $this->get($id), $prevValue);
             }
         }

@@ -16,7 +16,7 @@ abstract class AbstractComponent implements ComponentInterface
 
     protected function notifyHub($id)
     {
-        if($this->hub) {
+        if ($this->hub) {
             $this->hub->update($id);
         }
     }

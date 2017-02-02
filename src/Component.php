@@ -33,7 +33,7 @@ class Component extends AbstractComponent
 
     protected function checkLock()
     {
-        if ($this->isLocked){
+        if ($this->isLocked) {
             throw new \Exception("Can't modify definitions after registering component");
         }
     }
@@ -41,9 +41,9 @@ class Component extends AbstractComponent
     public function define($id, $value = null)
     {
         $this->checkLock();
-        $this->lastDefinition  = $this->definitions[] = new Definition($id, $this);
-        $this->methods[ComponentMethodNaming::getter($this->lastDefinition)] = function() use($id) {
-          return $this->values[$id];
+        $this->lastDefinition = $this->definitions[] = new Definition($id, $this);
+        $this->methods[ComponentMethodNaming::getter($this->lastDefinition)] = function () use ($id) {
+            return $this->values[$id];
         };
         $this->values[$id] = $value;
         return $this;
@@ -53,7 +53,7 @@ class Component extends AbstractComponent
     {
         $this->checkLock();
         $id = $this->lastDefinition->id;
-        $this->methods[ComponentMethodNaming::setter($this->lastDefinition)] = function($newVal) use($onSet, $id) {
+        $this->methods[ComponentMethodNaming::setter($this->lastDefinition)] = function ($newVal) use ($onSet, $id) {
             if ($onSet) {
                 $newVal = $onSet($newVal);
             }
@@ -79,7 +79,7 @@ class Component extends AbstractComponent
         $this->checkLock();
         $methodName = ComponentMethodNaming::tracks($this->lastDefinition, $id);
         $this->methods[$methodName] = $func;
-        $this->lastDefinition->uses[$id] =  $methodName;
+        $this->lastDefinition->uses[$id] = $methodName;
         return $this;
     }
 
@@ -87,19 +87,19 @@ class Component extends AbstractComponent
     public function register(ComponentDefinitions $definitions)
     {
         $this->isLocked = true;
-        foreach($this->definitions as $src) {
+        foreach ($this->definitions as $src) {
             $d = $definitions->define($src->id);
             if ($src->hasSetter) {
                 $d->withSetter();
             }
-            foreach(array_keys($src->usedBy) as $id) {
+            foreach (array_keys($src->usedBy) as $id) {
                 $d->usedBy($id);
             }
-            foreach(array_keys($src->uses) as $id) {
+            foreach (array_keys($src->uses) as $id) {
                 $d->uses($id);
             }
         }
-        foreach($this->extends as $id) {
+        foreach ($this->extends as $id) {
             $definitions->extend($id);
         }
     }

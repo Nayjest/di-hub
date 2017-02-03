@@ -20,4 +20,9 @@ abstract class AbstractComponent implements ComponentInterface
             $this->hub->update($id);
         }
     }
+
+    public function handle($message, array $arguments)
+    {
+        return call_user_func_array([$this, $message], $arguments);
+    }
 }

@@ -61,7 +61,7 @@ class Item
         if ($this->definition->getter === null) {
             $this->definition->getter = ComponentMethodNaming::getter($this->definition);
         }
-        $this->value = $this->component->{$this->definition->getter}();
+        $this->value = $this->component->handle($this->definition->getter, []);
         $this->initialized = true;
         return $this->value;
     }
@@ -74,7 +74,7 @@ class Item
         if ($this->definition->setter === null) {
             $this->definition->setter = ComponentMethodNaming::setter($this->definition);
         }
-        $this->component->{$this->definition->setter}($value);
+        $this->component->handle($this->definition->setter, [$value]);
     }
 
     public function useItem($id, $newValue, $oldValue = null)
@@ -82,11 +82,11 @@ class Item
         if ($this->definition->uses[$id] === null) {
             $this->definition->uses[$id] = ComponentMethodNaming::tracks($this->definition, $id);
         }
-        $this->component->{$this->definition->uses[$id]}(
+        $this->component->handle($this->definition->uses[$id], [
             $this->value,
             $newValue,
             $oldValue
-        );
+        ]);
     }
 
     public function useItByItem($id, $receiver, $prevValue = null)
@@ -94,11 +94,11 @@ class Item
         if ($this->definition->usedBy[$id] === null) {
             $this->definition->usedBy[$id] = ComponentMethodNaming::trackedBy($this->definition, $id);
         }
-        $this->component->{$this->definition->usedBy[$id]}(
+        $this->component->handle($this->definition->usedBy[$id], [
             $receiver,
             $this->value,
             $prevValue
-        );
+        ]);
     }
 
     public function getValue()

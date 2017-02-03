@@ -2,34 +2,43 @@
 
 namespace Nayjest\DI;
 
+use Nayjest\DI\Exception\ReadonlyException;
+
 class ValueComponent extends AbstractComponent
 {
-    /**
-     * @var
-     */
+    /** @var string */
     private $id;
-    /**
-     * @var
-     */
+
+    /** @var mixed */
     private $value;
 
     /**
-     * SimpleValueComponent constructor.
-     * @param $id
-     * @param $value
+     * @var bool
      */
-    public function __construct($id, $value)
+    private $readonly;
+
+    /**
+     * Constructor.
+     *
+     * @param string $id
+     * @param mixed $value
+     * @param bool $readonly
+     */
+    public function __construct($id, $value = null, $readonly = false)
     {
         $this->id = $id;
         $this->value = $value;
+        $this->readonly = $readonly;
     }
 
     public function register(ComponentDefinitions $definitions)
     {
-        $definitions
+        $definition = $definitions
             ->define($this->id)
-            ->namedLocallyAs('value')
-            ->withSetter();
+            ->namedLocallyAs('value');
+        if (!$this->readonly) {
+            $definition->withSetter();
+        }
     }
 
     /**
@@ -40,9 +49,11 @@ class ValueComponent extends AbstractComponent
         return $this->value;
     }
 
-
     public function setValue($value)
     {
+        if ($this->readonly && $this->hub !== null) {
+            throw new ReadonlyException;
+        }
         $this->value = $value;
         $this->notifyHub($this->id);
         return $this;

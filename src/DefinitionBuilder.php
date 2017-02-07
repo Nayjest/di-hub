@@ -17,9 +17,9 @@ class DefinitionBuilder
         $this->definition = $definition;
     }
 
-    public function withSetter()
+    public function readonly()
     {
-        $this->definition->hasSetter = true;
+        $this->definition->hasSetter = false;
         return $this;
     }
 

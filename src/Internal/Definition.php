@@ -3,7 +3,9 @@
 namespace Nayjest\DI\Internal;
 
 /**
- * Class Definition
+ * Class Definition.
+ * Stores item definition.
+ *
  * @internal
  */
 class Definition
@@ -14,7 +16,7 @@ class Definition
     }
 
     public $id;
-    public $hasSetter = false;
+    public $hasSetter = true;
     public $setter;
     public $getter;
     public $usedBy = [];

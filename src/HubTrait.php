@@ -31,13 +31,15 @@ trait HubTrait
     {
         $definitions = [];
         $extensions = [];
-        $component->register(
+        /** @var HubInterface|self $this */
+        $component->handle(Hub::MESSAGE_REGISTER, [
             new ComponentDefinitions(
                 $definitions,
                 $extensions
-            )
-        );
-        $component->setHub($this);
+            ),
+            $this
+        ]);
+
         $this->registerExtensions($extensions, $component);
         foreach ($definitions as $definition) {
             $this->registerDefinition($definition, $component);

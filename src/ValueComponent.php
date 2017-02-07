@@ -31,16 +31,6 @@ class ValueComponent extends AbstractComponent
         $this->readonly = $readonly;
     }
 
-    public function register(ComponentDefinitions $definitions)
-    {
-        $definition = $definitions
-            ->define($this->id)
-            ->namedLocallyAs('value');
-        if (!$this->readonly) {
-            $definition->withSetter();
-        }
-    }
-
     /**
      * @return mixed
      */
@@ -57,5 +47,15 @@ class ValueComponent extends AbstractComponent
         $this->value = $value;
         $this->notifyHub($this->id);
         return $this;
+    }
+
+    protected function register(ComponentDefinitions $definitions, HubInterface $hub)
+    {
+        $definition = $definitions
+            ->define($this->id)
+            ->namedLocallyAs('value');
+        if ($this->readonly) {
+            $definition->readonly();
+        }
     }
 }

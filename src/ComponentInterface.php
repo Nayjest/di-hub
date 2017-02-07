@@ -4,9 +4,12 @@ namespace Nayjest\DI;
 
 interface ComponentInterface
 {
-    public function register(ComponentDefinitions $definitions);
-
-    public function setHub(HubInterface $hub);
-
+    /**
+     * @internal
+     *
+     * @param string $message
+     * @param array $arguments
+     * @return mixed
+     */
     public function handle($message, array $arguments);
 }

@@ -32,15 +32,6 @@ class Component extends AbstractComponent
         return new static;
     }
 
-    protected function checkLock()
-    {
-        if ($this->isLocked) {
-            throw new DefinitionLockException(
-                "Can't modify definitions after registering component."
-            );
-        }
-    }
-
     public function define($id, $value = null)
     {
         $this->checkLock();
@@ -86,27 +77,6 @@ class Component extends AbstractComponent
         return $this;
     }
 
-
-    public function register(ComponentDefinitions $definitions)
-    {
-        $this->isLocked = true;
-        foreach ($this->definitions as $src) {
-            $d = $definitions->define($src->id);
-            if ($src->hasSetter) {
-                $d->withSetter();
-            }
-            foreach (array_keys($src->usedBy) as $id) {
-                $d->usedBy($id);
-            }
-            foreach (array_keys($src->uses) as $id) {
-                $d->uses($id);
-            }
-        }
-        foreach ($this->extends as $id) {
-            $definitions->extend($id);
-        }
-    }
-
     public function __call($name, $arguments)
     {
         if (!array_key_exists($name, $this->methods)) {
@@ -121,5 +91,34 @@ class Component extends AbstractComponent
         $this->methods[ComponentMethodNaming::extend($id)] = $func;
         $this->extends[] = $id;
         return $this;
+    }
+
+    protected function register(ComponentDefinitions $definitions, HubInterface $hub)
+    {
+        $this->isLocked = true;
+        foreach ($this->definitions as $src) {
+            $d = $definitions->define($src->id);
+            if (!$src->hasSetter) {
+                $d->readonly();
+            }
+            foreach (array_keys($src->usedBy) as $id) {
+                $d->usedBy($id);
+            }
+            foreach (array_keys($src->uses) as $id) {
+                $d->uses($id);
+            }
+        }
+        foreach ($this->extends as $id) {
+            $definitions->extend($id);
+        }
+    }
+
+    protected function checkLock()
+    {
+        if ($this->isLocked) {
+            throw new DefinitionLockException(
+                "Can't modify definitions after registering component."
+            );
+        }
     }
 }

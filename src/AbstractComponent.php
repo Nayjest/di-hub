@@ -5,6 +5,5 @@ namespace Nayjest\DI;
 abstract class AbstractComponent implements ComponentInterface
 {
     use ComponentTrait;
-
-    abstract public function register(ComponentDefinitions $definitions);
+    abstract protected function register(ComponentDefinitions $definitions, HubInterface $hub);
 }

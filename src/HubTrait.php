@@ -133,7 +133,6 @@ trait HubTrait
 
     protected function initialize($id)
     {
-        \dump("initialize $id");
         $item = $this->items[$id];
         $old = $item->isInitialized() ? $item->getValue() : null;
         $item->initializeValue();

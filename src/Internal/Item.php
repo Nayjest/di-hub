@@ -83,25 +83,30 @@ class Item
             $this->definition->uses[$id] = ComponentMethodNaming::tracks($this->definition, $id);
         }
         $this->component->handle($this->definition->uses[$id], [
-            $this->value,
+            &$this->value,
             $newValue,
             $oldValue
         ]);
     }
 
-    public function useItByItem($id, $receiver, $prevValue = null)
+    public function useItByItem($id, &$receiver, $prevValue = null)
     {
         if ($this->definition->usedBy[$id] === null) {
             $this->definition->usedBy[$id] = ComponentMethodNaming::trackedBy($this->definition, $id);
         }
         $this->component->handle($this->definition->usedBy[$id], [
-            $receiver,
+            &$receiver,
             $this->value,
             $prevValue
         ]);
     }
 
     public function getValue()
+    {
+        return $this->value;
+    }
+
+    public function &getValueRef()
     {
         return $this->value;
     }

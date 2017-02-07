@@ -62,4 +62,49 @@ class ValueComponentTest extends TestCase
         $this->hub->set('prop', 'new_val');
         $this->assertTrue($this->hub->get('prop') === 'new_val');
     }
+
+    public function testUses()
+    {
+        $this->component->uses('other_item', function(&$receiver, $other) {
+            $receiver .= $other;
+        });
+        $this->hub
+            ->add($this->component)
+            ->add(new ValueComponent('other_item', '_updated'));
+        $this->assertEquals('initial_val_updated', $this->hub->get('prop'));
+        $this->hub->set('other_item', '_again');
+        $this->assertEquals('initial_val_updated_again', $this->hub->get('prop'));
+    }
+
+    public function testUsedBy()
+    {
+        $prop2 = new ValueComponent('prop2', '_updated');
+        $prop2->usedBy('prop', function(&$receiver, $other) {
+            $receiver .= $other;
+        });
+        $this->hub
+            ->add($this->component)
+            ->add($prop2);
+        $this->assertEquals('initial_val_updated', $this->hub->get('prop'));
+        $this->hub->set('prop2', '_again');
+        $this->assertEquals('initial_val_updated_again', $this->hub->get('prop'));
+    }
+
+    public function testUsesChain()
+    {
+        $this->component->uses('prop2', function(&$receiver, $other) {
+            $receiver .= $other;
+        });
+        $this->hub
+            ->add($this->component)
+            ->add(new ValueComponent('prop2', '_updated'));
+
+        $this->assertEquals('initial_val_updated', $this->hub->get('prop'));
+        $this->hub->get('prop2');
+        $this->hub->add((new ValueComponent('prop3', '_twice'))->usedBy('prop2', function(&$receiver, $other) {
+            $receiver .= $other;
+        }));
+        $this->assertEquals('_updated_twice', $this->hub->get('prop2'));
+        //$this->assertEquals('initial_val_updated_updated_twice', $this->hub->get('prop'));
+    }
 }

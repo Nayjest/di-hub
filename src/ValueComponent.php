@@ -3,19 +3,15 @@
 namespace Nayjest\DI;
 
 use Nayjest\DI\Exception\ReadonlyException;
+use Nayjest\DI\Internal\Definition;
 
 class ValueComponent extends AbstractComponent
 {
-    /** @var string */
-    private $id;
-
     /** @var mixed */
     private $value;
 
-    /**
-     * @var bool
-     */
-    private $readonly;
+    /** @var  Definition */
+    private $definition;
 
     /**
      * Constructor.
@@ -26,9 +22,12 @@ class ValueComponent extends AbstractComponent
      */
     public function __construct($id, $value = null, $readonly = false)
     {
-        $this->id = $id;
         $this->value = $value;
-        $this->readonly = $readonly;
+        $this->definition = new Definition($id);
+        $this->definition->localId = 'value';
+        if ($readonly) {
+            $this->definition->hasSetter = false;
+        }
     }
 
     /**
@@ -41,21 +40,28 @@ class ValueComponent extends AbstractComponent
 
     public function setValue($value)
     {
-        if ($this->readonly && $this->hub !== null) {
+        if (!$this->definition->hasSetter) {
             throw new ReadonlyException;
         }
         $this->value = $value;
-        $this->notifyHub($this->id);
+        $this->notifyHub($this->definition->id);
         return $this;
     }
 
     protected function register(ComponentDefinitions $definitions, HubInterface $hub)
     {
-        $definition = $definitions
-            ->define($this->id)
-            ->namedLocallyAs('value');
-        if ($this->readonly) {
-            $definition->readonly();
-        }
+        $definitions->add($this->definition);
+    }
+
+    public function uses($id, callable $function)
+    {
+        $this->definition->uses[$id] = $function;
+        return $this;
+    }
+
+    public function usedBy($id, callable $function)
+    {
+        $this->definition->usedBy[$id] = $function;
+        return $this;
     }
 }

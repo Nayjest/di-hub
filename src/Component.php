@@ -36,10 +36,24 @@ class Component extends AbstractComponent
     {
         $this->checkLock();
         $this->lastDefinition = $this->definitions[] = new Definition($id);
-        $this->methods[ComponentMethodNaming::getter($this->lastDefinition)] = function () use ($id) {
+        $getterName = ComponentMethodNaming::getter($this->lastDefinition);
+        $this->methods[$getterName] = $this->lastDefinition->getter = function () use ($id) {
             return $this->values[$id];
         };
+        $this->withSetter();
         $this->values[$id] = $value;
+        return $this;
+    }
+
+    public function readonly()
+    {
+        $this->checkLock();
+        $setterName = ComponentMethodNaming::setter($this->lastDefinition);
+        if (array_key_exists($setterName, $this->methods)) {
+            unset($this->methods[$setterName]);
+        }
+        $this->lastDefinition->hasSetter = false;
+        $this->lastDefinition->setter = null;
         return $this;
     }
 
@@ -47,7 +61,8 @@ class Component extends AbstractComponent
     {
         $this->checkLock();
         $id = $this->lastDefinition->id;
-        $this->methods[ComponentMethodNaming::setter($this->lastDefinition)] = function ($newVal) use ($onSet, $id) {
+        $setterName = ComponentMethodNaming::setter($this->lastDefinition);
+        $this->methods[$setterName] = $this->lastDefinition->setter = function ($newVal) use ($onSet, $id) {
             if ($onSet) {
                 $newVal = $onSet($newVal);
             }
@@ -62,18 +77,14 @@ class Component extends AbstractComponent
     public function usedBy($id, callable $func)
     {
         $this->checkLock();
-        $methodName = ComponentMethodNaming::trackedBy($this->lastDefinition, $id);
-        $this->methods[$methodName] = $func;
-        $this->lastDefinition->usedBy[$id] = $methodName;
+        $this->lastDefinition->usedBy[$id] = $func;
         return $this;
     }
 
     public function uses($id, callable $func)
     {
         $this->checkLock();
-        $methodName = ComponentMethodNaming::tracks($this->lastDefinition, $id);
-        $this->methods[$methodName] = $func;
-        $this->lastDefinition->uses[$id] = $methodName;
+        $this->lastDefinition->uses[$id] = $func;
         return $this;
     }
 
@@ -96,17 +107,8 @@ class Component extends AbstractComponent
     protected function register(ComponentDefinitions $definitions, HubInterface $hub)
     {
         $this->isLocked = true;
-        foreach ($this->definitions as $src) {
-            $d = $definitions->define($src->id);
-            if (!$src->hasSetter) {
-                $d->readonly();
-            }
-            foreach (array_keys($src->usedBy) as $id) {
-                $d->usedBy($id);
-            }
-            foreach (array_keys($src->uses) as $id) {
-                $d->uses($id);
-            }
+        foreach ($this->definitions as $definition) {
+            $definitions->add($definition);
         }
         foreach ($this->extends as $id) {
             $definitions->extend($id);

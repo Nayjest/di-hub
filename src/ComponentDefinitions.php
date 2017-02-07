@@ -26,6 +26,12 @@ class ComponentDefinitions
         return new DefinitionBuilder($definition);
     }
 
+    public function add(Definition $definition)
+    {
+        $this->definitions[$definition->id] = $definition;
+        return $this;
+    }
+
     public function extend($id)
     {
         $this->extensions[] = $id;

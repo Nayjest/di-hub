@@ -27,6 +27,9 @@ trait ComponentTrait
             /** @var $this ComponentInterface|self */
             $this->hub = $arguments[1];
         }
+        if (!is_string($message) && is_callable($message)) {
+            return call_user_func_array($message, $arguments);
+        }
         return call_user_func_array([$this, $message], $arguments);
     }
 }

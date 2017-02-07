@@ -72,9 +72,7 @@ class ComponentTest extends TestCase
 
     public function testGetSet()
     {
-        $this->c
-            ->define('prop1')
-            ->withSetter();
+        $this->c->define('prop1');
         $this->c->setProp1(1);
         $this
             ->register()
@@ -85,7 +83,7 @@ class ComponentTest extends TestCase
 
     public function testSetWithoutSetter()
     {
-        $this->c->define('val', 1);
+        $this->c->define('val', 1)->readonly();
         $this->register();
         $hasException = false;
         try {

@@ -77,6 +77,12 @@ trait HubTrait
         return $this->items[$id]->getValue();
     }
 
+    protected function &getRef($id)
+    {
+        $this->get($id);
+        return $this->items[$id]->getValueRef();
+    }
+
     /**
      * Set's item value.
      * Throws exception if item isn't defined or has no setter.
@@ -127,6 +133,7 @@ trait HubTrait
 
     protected function initialize($id)
     {
+        \dump("initialize $id");
         $item = $this->items[$id];
         $old = $item->isInitialized() ? $item->getValue() : null;
         $item->initializeValue();
@@ -201,7 +208,7 @@ trait HubTrait
         foreach ($this->items as $otherId => $otherItem) {
             if ($otherItem->usedBy($id)) {
                 if ($this->hasInitialized($otherId)) {
-                    $otherItem->useItByItem($id, $this->get($id));
+                    $otherItem->useItByItem($id, $this->getRef($id));
                     continue;
                 }
                 // will call trackFrom
@@ -218,7 +225,7 @@ trait HubTrait
             if (!$this->hasInitialized($otherId)) {
                 continue;
             }
-            $item->useItByItem($otherId, $this->get($otherId), $prevValue);
+            $item->useItByItem($otherId, $this->getRef($otherId), $prevValue);
         };
 
         foreach ($this->items as $otherId => $otherItem) {

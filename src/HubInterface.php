@@ -7,12 +7,6 @@ use Interop\Container\ContainerInterface;
 interface HubInterface extends ContainerInterface
 {
     /**
-     * @param string $id
-     * @return $this
-     */
-    public function update($id);
-
-    /**
      * Set's item value.
      * Throws exception if item isn't defined or has no setter.
      *
@@ -24,17 +18,14 @@ interface HubInterface extends ContainerInterface
     public function set($id, $value);
 
     /**
-     * Adds component to hub.
-     *
-     * @api
-     * @param ComponentInterface $component
+     * @param Definition $definition
      * @return $this
      */
-    public function add(ComponentInterface $component);
+    public function addDefinition(Definition $definition);
 
     /**
-     * @param ComponentInterface[] $components
+     * @param Definition[] $definitions
      * @return $this
      */
-    public function addMany(array $components);
+    public function addDefinitions(array $definitions);
 }

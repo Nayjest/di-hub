@@ -27,8 +27,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Nayjest\\DI\\Test\\" : "tests/unit",
-            "Nayjest\\DI\\Example\\" : "tests/examples"
+            "Nayjest\\DI\\Test\\" : "tests"
         }
     },
     "require": {
@@ -46,7 +45,8 @@
     "scripts": {
         "code-style": "php vendor/squizlabs/php_codesniffer/scripts/phpcs --standard=psr2 src/",
         "test": "php vendor/phpunit/phpunit/phpunit",
-        "unit-test": "php vendor/phpunit/phpunit/phpunit --testsuite unit"
+        "unit-test": "php vendor/phpunit/phpunit/phpunit --testsuite unit",
+        "int-test": "php vendor/phpunit/phpunit/phpunit --testsuite integration"
     },
     "support": {
         "email": "mail@vitaliy.in",

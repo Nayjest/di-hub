@@ -2,42 +2,25 @@
 
 namespace Nayjest\DI;
 
-use Nayjest\DI\Internal\Definition;
-
 class DefinitionBuilder
 {
     /**
-     * @var Definition
+     * @var HubInterface
      */
-    protected $definition;
+    private $hub;
+    private $definition;
 
-
-    public function __construct(Definition $definition)
+    public function __construct(HubInterface $hub)
     {
-        $this->definition = $definition;
+        $this->hub = $hub;
     }
 
-    public function readonly()
+    public function define($id, $value = null, $readonly = false)
     {
-        $this->definition->hasSetter = false;
-        return $this;
-    }
-
-    public function usedBy($id, $method = null)
-    {
-        $this->definition->usedBy[$id] = $method;
-        return $this;
-    }
-
-    public function uses($id, $method = null)
-    {
-        $this->definition->uses[$id] = $method;
-        return $this;
-    }
-
-    public function namedLocallyAs($id)
-    {
-        $this->definition->localId = $id;
+        $this->definition = new Definition($id, $value);
+        if ($readonly) {
+            $this->definition->readonly = true;
+        }
         return $this;
     }
 }

@@ -28,4 +28,9 @@ interface HubInterface extends ContainerInterface
      * @return $this
      */
     public function addDefinitions(array $definitions);
+
+    /**
+     * @return DefinitionBuilder
+     */
+    public function builder();
 }

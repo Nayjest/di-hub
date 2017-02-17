@@ -146,7 +146,7 @@ class HubTest extends TestCase
             ->uses(['a','b','c'], function(&$t, $s){$t.=$s;});
         $hub->remove('concat');
         $this->assertFalse($hub->has('concat'));
-        // @todo
+        // @todo will fail
         //$hub->set('b', 'B2');
     }
 }

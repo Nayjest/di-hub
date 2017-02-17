@@ -2,10 +2,9 @@
 
 namespace Nayjest\DI;
 
-use Interop\Container\ContainerInterface;
 use Nayjest\DI\Exception\DefinitionBuilderException;
 
-class DefinitionBuilder implements ContainerInterface
+class DefinitionBuilder
 {
     /**
      * @var HubInterface

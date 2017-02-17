@@ -73,20 +73,4 @@ class DefinitionBuilder implements ContainerInterface
         $this->hub->addDefinition($rel);
         return $this;
     }
-
-    public function get($id)
-    {
-        return $this->hub->get($id);
-    }
-
-    public function has($id)
-    {
-        return $this->hub->has($id);
-    }
-
-    public function set($id, $value)
-    {
-        $this->hub->set($id, $value);
-        return $this;
-    }
 }

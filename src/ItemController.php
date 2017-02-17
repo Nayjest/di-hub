@@ -12,7 +12,7 @@ use Nayjest\DI\Exception\ReadonlyException;
 class ItemController
 {
     /**
-     * @var Definition
+     * @var ItemDefinition
      */
     public $definition;
 
@@ -23,7 +23,7 @@ class ItemController
     /** @var RelationController */
     private $relationController;
 
-    public function __construct(Definition $definition, RelationController $relationController)
+    public function __construct(ItemDefinition $definition, RelationController $relationController)
     {
         $this->definition = $definition;
         $this->relationController = $relationController;

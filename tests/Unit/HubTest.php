@@ -2,7 +2,7 @@
 
 namespace Nayjest\DI\Test\Unit;
 
-use Nayjest\DI\Definition;
+use Nayjest\DI\ItemDefinition;
 use Nayjest\DI\Exception\AlreadyDefinedException;
 use Nayjest\DI\Exception\NotFoundException;
 use Nayjest\DI\Hub;
@@ -40,12 +40,12 @@ class HubTest extends TestCase
     /**
      * @param string $id
      * @param null $value
-     * @return PHPUnit_Framework_MockObject_MockObject|Definition
+     * @return PHPUnit_Framework_MockObject_MockObject|ItemDefinition
      */
     protected function mockDefinition($id, $value = null)
     {
-        /** @var PHPUnit_Framework_MockObject_MockObject|Definition $definition */
-        $definition = $this->createMock(Definition::class);
+        /** @var PHPUnit_Framework_MockObject_MockObject|ItemDefinition $definition */
+        $definition = $this->createMock(ItemDefinition::class);
         $definition->id = $id;
         $definition->relations = [];
         if ($value!== null) {

@@ -18,13 +18,13 @@ interface HubInterface extends ContainerInterface
     public function set($id, $value);
 
     /**
-     * @param Definition $definition
+     * @param DefinitionInterface $definition
      * @return $this
      */
-    public function addDefinition(Definition $definition);
+    public function addDefinition(DefinitionInterface $definition);
 
     /**
-     * @param Definition[] $definitions
+     * @param DefinitionInterface[] $definitions
      * @return $this
      */
     public function addDefinitions(array $definitions);

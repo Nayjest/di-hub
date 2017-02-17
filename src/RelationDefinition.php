@@ -2,8 +2,7 @@
 
 namespace Nayjest\DI;
 
-
-class Relation
+class RelationDefinition implements DefinitionInterface
 {
     /** @var  string|null */
     public $source;

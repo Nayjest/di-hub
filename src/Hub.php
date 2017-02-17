@@ -1,7 +1,9 @@
 <?php
 namespace Nayjest\DI;
 
+use InvalidArgumentException;
 use Nayjest\DI\Exception\AlreadyDefinedException;
+use Nayjest\DI\Exception\CanNotRemoveDefinitionException;
 use Nayjest\DI\Exception\NotFoundException;
 
 class Hub implements HubInterface
@@ -11,32 +13,47 @@ class Hub implements HubInterface
 
     private $relationController;
 
-    public function __construct()
+    protected $builderInstance;
+
+    public function __construct(array $definitions = null)
     {
         $this->relationController = new RelationController($this->items, $this);
+        if ($definitions !== null) {
+            $this->addDefinitions($definitions);
+        }
+    }
+
+    public function builder()
+    {
+        if ($this->builderInstance === null) {
+            $this->builderInstance = new DefinitionBuilder($this);
+        }
+        return $this->builderInstance;
     }
 
     /**
-     * @param Definition $definition
+     * @param DefinitionInterface $definition
      * @return $this
      */
-    public function addDefinition(Definition $definition)
+    public function addDefinition(DefinitionInterface $definition)
     {
-        if ($this->has($definition->id)) {
-            throw new AlreadyDefinedException;
+        if ($definition instanceof ItemDefinition) {
+            $this->addItemDefinition($definition);
+        } elseif ($definition instanceof RelationDefinition) {
+            $this->relationController->addRelation($definition);
+        } else {
+            throw new InvalidArgumentException("Unsupported definition " . get_class($definition));
         }
-        $this->items[$definition->id] = new ItemController($definition, $this->relationController);
-        $this->relationController->onNewItemOrValue($definition->id);
         return $this;
     }
 
     /**
-     * @param Definition[] $definitions
+     * @param ItemDefinition[] $definitions
      * @return $this
      */
     public function addDefinitions(array $definitions)
     {
-        foreach($definitions as $definition) {
+        foreach ($definitions as $definition) {
             $this->addDefinition($definition);
         }
         return $this;
@@ -80,5 +97,29 @@ class Hub implements HubInterface
     public function has($id)
     {
         return array_key_exists($id, $this->items);
+    }
+
+    protected function addItemDefinition(ItemDefinition $definition)
+    {
+        if ($this->has($definition->id)) {
+            throw new AlreadyDefinedException;
+        }
+        $this->items[$definition->id] = new ItemController($definition, $this->relationController);
+        $this->relationController->onNewItemOrValue($definition->id);
+    }
+
+    public function remove($id)
+    {
+        if (!$this->has($id)) {
+            throw new NotFoundException;
+        }
+        if (
+        !$this->relationController->canRemove($id)
+        || $this->items[$id]->isInitialized()
+        ) {
+            throw new CanNotRemoveDefinitionException;
+        }
+        unset($this->items[$id]);
+        return $this;
     }
 }

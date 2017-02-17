@@ -2,14 +2,41 @@
 
 namespace Nayjest\DI;
 
+use Nayjest\DI\Exception\AlreadyDefinedException;
+
 class RelationController
 {
     /** @var ItemController[] */
     private $items;
+    /** @var RelationDefinition[] */
+    private $relations = [];
 
     public function __construct(array &$items, HubInterface $hub)
     {
         $this->items = &$items;
+    }
+
+    public function addRelation(RelationDefinition $definition)
+    {
+        if (in_array($definition, $this->relations, true)) {
+            throw new AlreadyDefinedException;
+        }
+        $this->relations[] = $definition;
+        $target = $definition->target;
+        $source = $definition->source;
+        if (
+            isset($this->items[$target])
+            && isset($this->items[$source])
+            && $this->items[$target]->isInitialized()
+        ) {
+            if ($this->items[$source]->isInitialized()) {
+                $this->handleRelation($definition, true);
+            } else {
+                // get() will call initialization
+                // and relation will be processed on init
+                $this->items[$source]->get();
+            }
+        }
     }
 
     public function onNewItemOrValue($id)
@@ -61,9 +88,9 @@ class RelationController
         }
     }
 
-    protected function handleRelation(Relation $relation, $initializeSource, $prevSourceValue)
+    protected function handleRelation(RelationDefinition $relation, $initializeSource, $prevSourceValue = null)
     {
-        $source = $relation->source?$this->items[$relation->source]->get($initializeSource):null;
+        $source = $relation->source ? $this->items[$relation->source]->get($initializeSource) : null;
         $target = &$this->items[$relation->target]->get(false);
         call_user_func_array($relation->handler, [
             &$target,
@@ -74,16 +101,14 @@ class RelationController
 
     /**
      * @param $id
-     * @return Relation[]
+     * @return RelationDefinition[]
      */
     protected function getRelationsByTarget($id)
     {
         $res = [];
-        foreach ($this->items as $item) {
-            foreach ($item->definition->relations as $relation) {
-                if ($relation->target === $id) {
-                    $res[] = $relation;
-                }
+        foreach ($this->relations as $relation) {
+            if ($relation->target === $id) {
+                $res[] = $relation;
             }
         }
         return $res;
@@ -91,18 +116,21 @@ class RelationController
 
     /**
      * @param $id
-     * @return Relation[]
+     * @return RelationDefinition[]
      */
     protected function getRelationsBySource($id)
     {
         $res = [];
-        foreach ($this->items as $item) {
-            foreach ($item->definition->relations as $relation) {
-                if ($relation->source === $id) {
-                    $res[] = $relation;
-                }
+        foreach ($this->relations as $relation) {
+            if ($relation->source === $id) {
+                $res[] = $relation;
             }
         }
         return $res;
+    }
+
+    public function canRemove($id)
+    {
+        return empty($this->getRelationsBySource($id));
     }
 }

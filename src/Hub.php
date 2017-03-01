@@ -102,7 +102,7 @@ class Hub implements HubInterface
     protected function addItemDefinition(ItemDefinition $definition)
     {
         if ($this->has($definition->id)) {
-            throw new AlreadyDefinedException;
+            throw new AlreadyDefinedException("Item '{$definition->id}' already defined.");
         }
         $this->items[$definition->id] = new ItemController($definition, $this->relationController);
         $this->relationController->onNewItemOrValue($definition->id);

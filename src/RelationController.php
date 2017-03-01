@@ -19,7 +19,9 @@ class RelationController
     public function addRelation(RelationDefinition $definition)
     {
         if (in_array($definition, $this->relations, true)) {
-            throw new AlreadyDefinedException;
+            throw new AlreadyDefinedException(
+                "Relation ('{$definition->source}' to '{$definition->target}') already defined."
+            );
         }
         $this->relations[] = $definition;
         $target = $definition->target;

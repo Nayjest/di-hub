@@ -55,7 +55,7 @@ class RelationController
     public function hasInitializedDependantFrom($id)
     {
         foreach ($this->getRelationsBySource($id) as $relation) {
-            if ($this->items[$relation->target]->isInitialized()) {
+            if ($relation->target !== null && $this->items[$relation->target]->isInitialized()) {
                 return true;
             }
         }
@@ -73,12 +73,14 @@ class RelationController
     {
         $propagated = [];
         foreach ($this->getRelationsBySource($id) as $relation) {
-            $targetItem = $this->items[$relation->target];
-            if (!$targetItem->isInitialized()) {
-                continue;
-            }
-            if ($relation->propagated) {
-                $propagated[$relation->target] = $targetItem->get();
+            if ($relation->target !== null) {
+                $targetItem = $this->items[$relation->target];
+                if (!$targetItem->isInitialized()) {
+                    continue;
+                }
+                if ($relation->propagated) {
+                    $propagated[$relation->target] = $targetItem->get();
+                }
             }
             $this->handleRelation($relation, false, $prevValue);
         }
@@ -90,7 +92,11 @@ class RelationController
     protected function handleRelation(RelationDefinition $relation, $initializeSource, $prevSourceValue = null)
     {
         $source = $relation->source ? $this->items[$relation->source]->get($initializeSource) : null;
-        $target = &$this->items[$relation->target]->get(false);
+        if ($relation->target === null) {
+            $target = null;
+        } else {
+            $target = &$this->items[$relation->target]->get(false);
+        }
         call_user_func_array($relation->handler, [
             &$target,
             $source,

@@ -5,6 +5,7 @@ use InvalidArgumentException;
 use Nayjest\DI\Exception\AlreadyDefinedException;
 use Nayjest\DI\Exception\CanNotRemoveDefinitionException;
 use Nayjest\DI\Exception\NotFoundException;
+use Nayjest\DI\Exception\UnsupportedDefinitionTypeException;
 
 class Hub implements HubInterface
 {
@@ -42,7 +43,7 @@ class Hub implements HubInterface
         } elseif ($definition instanceof RelationDefinition) {
             $this->relationController->addRelation($definition);
         } else {
-            throw new InvalidArgumentException("Unsupported definition " . get_class($definition));
+            throw UnsupportedDefinitionTypeException::makeFor($definition);
         }
         return $this;
     }

@@ -45,7 +45,7 @@ class RelationController
     {
         if ($this->hasInitializedDependantFrom($id)) {
             // forces initialization
-            $this->items[$id]->get();
+            $this->items[$id]->get(true);
         }
     }
 
@@ -53,6 +53,11 @@ class RelationController
     {
         $this->handleDependencies($id);
         $this->notifyDependant($id, $prevValue);
+    }
+
+    public function canRemove($id)
+    {
+        return empty($this->getRelationsBySource($id));
     }
 
     protected function hasInitializedDependantFrom($id)
@@ -129,10 +134,5 @@ class RelationController
             }
         }
         return $res;
-    }
-
-    public function canRemove($id)
-    {
-        return empty($this->getRelationsBySource($id));
     }
 }

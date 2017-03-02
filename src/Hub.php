@@ -1,7 +1,6 @@
 <?php
 namespace Nayjest\DI;
 
-use InvalidArgumentException;
 use Nayjest\DI\Exception\AlreadyDefinedException;
 use Nayjest\DI\Exception\CanNotRemoveDefinitionException;
 use Nayjest\DI\Exception\NotFoundException;

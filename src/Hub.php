@@ -68,7 +68,6 @@ class Hub implements HubInterface
         return $this->items[$id]->get();
     }
 
-
     /**
      * Set's item value.
      * Throws exception if item isn't defined or has no setter.
@@ -105,7 +104,6 @@ class Hub implements HubInterface
             throw new AlreadyDefinedException("Item '{$definition->id}' already defined.");
         }
         $this->items[$definition->id] = new ItemController($definition, $this->relationController);
-        $this->relationController->onNewItemOrValue($definition->id);
     }
 
     public function remove($id)

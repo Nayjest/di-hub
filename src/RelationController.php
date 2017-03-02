@@ -41,14 +41,6 @@ class RelationController
         }
     }
 
-    public function onNewItemOrValue($id)
-    {
-        if ($this->hasInitializedDependantFrom($id)) {
-            // forces initialization
-            $this->items[$id]->get(true);
-        }
-    }
-
     public function onInitialize($id, $prevValue)
     {
         $this->handleDependencies($id);
@@ -60,7 +52,7 @@ class RelationController
         return empty($this->getRelationsBySource($id));
     }
 
-    protected function hasInitializedDependantFrom($id)
+    public function hasInitializedDependantFrom($id)
     {
         foreach ($this->getRelationsBySource($id) as $relation) {
             if ($this->items[$relation->target]->isInitialized()) {

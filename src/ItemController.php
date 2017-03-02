@@ -27,6 +27,7 @@ class ItemController
     {
         $this->definition = $definition;
         $this->relationController = $relationController;
+        $this->initializeIfUsed();
     }
 
     public function isInitialized()
@@ -41,7 +42,7 @@ class ItemController
         }
         $this->definition->source = $this->wrapIfCallable($value);
         $this->initialized = false;
-        $this->relationController->onNewItemOrValue($this->definition->id);
+        $this->initializeIfUsed();
     }
 
     public function &get($initialize = true)
@@ -50,6 +51,13 @@ class ItemController
             $this->initialize();
         }
         return $this->value;
+    }
+
+    protected function initializeIfUsed()
+    {
+        if ($this->relationController->hasInitializedDependantFrom($this->definition->id)) {
+            $this->initialize();
+        }
     }
 
     protected function initialize()

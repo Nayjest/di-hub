@@ -32,7 +32,7 @@ class SubHubTest extends TestCase
         $id = 'subhub';
         $internalHub = new Hub;
         $internalHub->builder()->define('item', 'value');
-        $subHub = new SubHub($id, $internalHub);
+        $subHub = new SubHub("$id.", $internalHub);
         $this->assertTrue($subHub->has("item"));
         $this->assertEquals('value', $subHub->get("item"));
 
@@ -54,7 +54,7 @@ class SubHubTest extends TestCase
 
     public function testSubHubInternalPredefining()
     {
-        $subHub = new SubHub('s', $hub = new Hub);
+        $subHub = new SubHub('s.', $hub = new Hub);
         $subHub->builder()->define('item', 'val');
         $this->assertEquals('val', $subHub->get("item"));
         $this->assertEquals('val', $hub->get("item"));
@@ -74,7 +74,7 @@ class SubHubTest extends TestCase
 
     public function testSubHubDelegation()
     {
-        $subHub = new SubHub('s', $hub = new Hub);
+        $subHub = new SubHub('s.', $hub = new Hub);
         $subHub->register($this->hub);
         $subHub->builder()->define('item', 'val');
         $this->assertEquals('val', $subHub->get("item"));
@@ -110,7 +110,7 @@ class SubHubTest extends TestCase
             })
             ->define('title', null, true);
 
-        $subHub = new SubHub($id, $internalHub);
+        $subHub = new SubHub("$id.", $internalHub);
         $subHub->register($this->hub);
 
         $this->hub->set("$id.item", 'val1');
@@ -128,7 +128,7 @@ class SubHubTest extends TestCase
         $id = 'subhub';
         $internalHub = new Hub;
         $internalHub->builder()->define('item', 'val');
-        $subHub = new SubHub($id, $internalHub);
+        $subHub = new SubHub("$id.", $internalHub);
         $subHub->register($this->hub);
 
         $this->hub->builder()
@@ -167,7 +167,7 @@ class SubHubTest extends TestCase
             })
             ->define('title', null, true);
 
-        $subHub = new SubHub($id, $internalHub);
+        $subHub = new SubHub("$id.", $internalHub);
         $subHub->register($this->hub);
 
         $this->hub->builder()
@@ -194,7 +194,7 @@ class SubHubTest extends TestCase
         $internalHub
             ->builder()
             ->define('item', 'val');
-        $subHub = new SubHub($id, $internalHub);
+        $subHub = new SubHub("$id.", $internalHub);
         $subHub->register($this->hub);
 
         $this->hub->builder()

@@ -11,8 +11,7 @@ use ReflectionClass;
  * This class allows to organize hierarchy of hubs.
  * It acts as full-featured decorator for nested hub and exposes it's data to parent(external) hub.
  *
- * All data of nested hub will be accessible in parent hub with keys in following format:
- * '<sub_hub_id>.<item_id_in_nested_hub>'
+ * All data of nested hub will be accessible in parent hub with keys prefixed by SubHub prefix.
  *
  * SubHub maintains relations between items of parent and nested hubs
  * (relations with target or source from parent hub must be defined ).
@@ -24,12 +23,12 @@ class SubHub implements HubInterface
     private $hub;
     /** @var  Hub */
     private $externalHub;
-    private $id;
+    private $prefix;
     private $builderInstance;
 
-    public function __construct($id, Hub $internalHub, Hub $externalHub = null)
+    public function __construct($namePrefix, Hub $internalHub, Hub $externalHub = null)
     {
-        $this->id = $id;
+        $this->prefix = $namePrefix;
         $this->hub = $internalHub;
         if ($externalHub) {
             $this->register($externalHub);
@@ -40,7 +39,7 @@ class SubHub implements HubInterface
     {
         $this->externalHub = $externalHub;
 
-        $externalHub->builder()->define($this->id, $this);
+        $externalHub->builder()->define($this->prefix, $this);
 
         $reflection = new ReflectionClass(Hub::class);
         $itemsProperty = $reflection->getProperty('items');
@@ -53,7 +52,7 @@ class SubHub implements HubInterface
         $externalItems = $itemsProperty->getValue($externalHub);
 
         foreach ($internalItems as $id => $item) {
-            $externalId = $this->externalId($id);
+            $externalId = $this->prefixedId($id);
             $externalItems[$externalId] = new ItemControllerWrapper($item, $externalId, $externalRelationController);
 
             # Define relation [item -> external.item]
@@ -68,9 +67,9 @@ class SubHub implements HubInterface
         $itemsProperty->setValue($externalHub, $externalItems);
     }
 
-    protected function externalId($internalId)
+    protected function prefixedId($id)
     {
-        return ($internalId === null) ? null : "{$this->id}.{$internalId}";
+        return ($id === null) ? null : $this->prefix . $id;
     }
 
     /**
@@ -85,7 +84,7 @@ class SubHub implements HubInterface
     public function set($id, $value)
     {
         if ($this->externalHub) {
-            $this->externalHub->set($this->externalId($id), $value);
+            $this->externalHub->set($this->prefixedId($id), $value);
         } else {
             $this->hub->set($id, $value);
         }
@@ -133,7 +132,7 @@ class SubHub implements HubInterface
     {
         if ($this->externalHub) {
             # Definitions can be delegated to external hub
-            return $this->externalHub->get($this->externalId($id));
+            return $this->externalHub->get($this->prefixedId($id));
         } else {
             return $this->hub->get($id);
         }
@@ -143,7 +142,7 @@ class SubHub implements HubInterface
     {
         if ($this->externalHub) {
             # Definitions can be delegated to external hub
-            return $this->externalHub->has($this->externalId($id));
+            return $this->externalHub->has($this->prefixedId($id));
         } else {
             return $this->hub->has($id);
         }
@@ -153,14 +152,14 @@ class SubHub implements HubInterface
     {
         if ($definition instanceof ItemDefinition) {
             $externalDefinition = new ItemDefinition(
-                $this->externalId($definition->id),
+                $this->prefixedId($definition->id),
                 $definition->source,
                 $definition->readonly
             );
         } elseif ($definition instanceof RelationDefinition) {
             $externalDefinition = new RelationDefinition(
-                $this->externalId($definition->target),
-                $this->externalId($definition->source),
+                $this->prefixedId($definition->target),
+                $this->prefixedId($definition->source),
                 $definition->handler
             );
             $externalDefinition->propagated = $definition->propagated;

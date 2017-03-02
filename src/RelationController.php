@@ -4,6 +4,11 @@ namespace Nayjest\DI;
 
 use Nayjest\DI\Exception\AlreadyDefinedException;
 
+/**
+ * Class RelationController
+ *
+ * @internal
+ */
 class RelationController
 {
     /** @var ItemController[] */
@@ -11,7 +16,7 @@ class RelationController
     /** @var RelationDefinition[] */
     private $relations = [];
 
-    public function __construct(array &$items, HubInterface $hub)
+    public function __construct(array &$items)
     {
         $this->items = &$items;
     }

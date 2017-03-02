@@ -18,7 +18,7 @@ class Hub implements HubInterface
 
     public function __construct(array $definitions = null)
     {
-        $this->relationController = new RelationController($this->items, $this);
+        $this->relationController = new RelationController($this->items);
         if ($definitions !== null) {
             $this->addDefinitions($definitions);
         }

@@ -112,10 +112,8 @@ class Hub implements HubInterface
         if (!$this->has($id)) {
             throw new NotFoundException;
         }
-        if (
-        !$this->relationController->canRemove($id)
-        || $this->items[$id]->isInitialized()
-        ) {
+        $canRemove = $this->relationController->canRemove($id) && $this->items[$id]->isInitialized();
+        if (!$canRemove) {
             throw new CanNotRemoveDefinitionException;
         }
         unset($this->items[$id]);

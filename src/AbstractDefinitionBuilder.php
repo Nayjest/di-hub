@@ -11,7 +11,7 @@ abstract class AbstractDefinitionBuilder
 
     abstract protected function addDefinition(DefinitionInterface $definition);
 
-    public final function defineMany(array $definitions)
+    final public function defineMany(array $definitions)
     {
         foreach ($definitions as $id => $src) {
             $this->define($id, $src);
@@ -22,20 +22,20 @@ abstract class AbstractDefinitionBuilder
         return $this;
     }
 
-    public final function define($id, $source = null, $readonly = false)
+    final public function define($id, $source = null, $readonly = false)
     {
         $this->addDefinition(new ItemDefinition($id, $source, $readonly));
         $this->currentItemId = $id;
         return $this;
     }
 
-    public final function defineRelation($target, $source, callable $func)
+    final public function defineRelation($target, $source, callable $func)
     {
         $this->addDefinition(new RelationDefinition($target, $source, $func));
         return $this;
     }
 
-    public final function uses($id, callable $func)
+    final public function uses($id, callable $func)
     {
         if (is_array($id)) {
             foreach ($id as $identifier) {
@@ -50,7 +50,7 @@ abstract class AbstractDefinitionBuilder
         return $this;
     }
 
-    public final function usedBy($id, callable $func)
+    final public function usedBy($id, callable $func)
     {
         if (is_array($id)) {
             foreach ($id as $identifier) {

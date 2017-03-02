@@ -26,11 +26,13 @@ class RelationController
         $this->relations[] = $definition;
         $target = $definition->target;
         $source = $definition->source;
-        if (
+
+        $needHandleImmediate =
             isset($this->items[$target])
             && isset($this->items[$source])
-            && $this->items[$target]->isInitialized()
-        ) {
+            && $this->items[$target]->isInitialized();
+
+        if ($needHandleImmediate) {
             if ($this->items[$source]->isInitialized()) {
                 $this->handleRelation($definition, true);
             } else {

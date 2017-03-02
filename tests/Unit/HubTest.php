@@ -2,6 +2,8 @@
 
 namespace Nayjest\DI\Test\Unit;
 
+use Nayjest\DI\DefinitionInterface;
+use Nayjest\DI\Exception\UnsupportedDefinitionTypeException;
 use Nayjest\DI\ItemDefinition;
 use Nayjest\DI\Exception\AlreadyDefinedException;
 use Nayjest\DI\Exception\NotFoundException;
@@ -61,6 +63,25 @@ class HubTest extends TestCase
         $result = $this->hub->addDefinition($this->mockDefinition('test-id'));
         $this->assertEquals($this->hub, $result, 'Method "adDefinition" not supports method chaining');
         $this->assertTrue($this->hub->has('test-id'));
+    }
+
+    public function testConstructWithDefinitions()
+    {
+        $hub = new Hub([
+            $this->mockDefinition('def1'),
+            $this->mockDefinition('def2')
+        ]);
+        $this->assertTrue($hub->has('def1'));
+        $this->assertTrue($hub->has('def2'));
+    }
+
+    public function testUnsupportedDefinition()
+    {
+        /** @var DefinitionInterface $definition */
+        $definition = $this->createMock(DefinitionInterface::class);
+
+        $this->expectException(UnsupportedDefinitionTypeException::class);
+        $this->hub->addDefinition($definition);
     }
 
     public function testAddExistingDefinition()

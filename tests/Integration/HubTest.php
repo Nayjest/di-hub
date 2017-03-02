@@ -55,7 +55,7 @@ class HubTest extends TestCase
         $this->assertEquals(101, $hub->set('final', 100)->get('final'));
 
         # assert relation works when changing source value
-        $this->assertEquals(100+2, $hub->set('added', 2)->get('final'));
+        $this->assertEquals(100 + 2, $hub->set('added', 2)->get('final'));
         $this->assertEquals(2, $hub->get('added'));
 
         # assert 2 level rel. works when added later
@@ -78,19 +78,36 @@ class HubTest extends TestCase
         $this->assertEquals(-8, $hub->get('added'));
     }
 
-    public function testEmptyRelation()
+    public function testEmptyRelationSource()
     {
 
         $hub = new Hub();
         $d1 = new ItemDefinition('item', 2);
-        $rel = new RelationDefinition('item', null, function(&$val){
+        $rel = new RelationDefinition('item', null, function (&$val) {
             $val++;
         });
         $hub
             ->addDefinition($d1)
             ->addDefinition($rel);
-        $this->assertEquals(2+1, $hub->get('item'));
-        $this->assertEquals(3+1, $hub->set('item', 3)->get('item'));
+        $this->assertEquals(2 + 1, $hub->get('item'));
+        $this->assertEquals(3 + 1, $hub->set('item', 3)->get('item'));
+    }
+
+    public function testEmptyRelationTarget()
+    {
+        $hub = new Hub();
+        $d1 = new ItemDefinition('item', 2);
+        $i = 1;
+        $rel = new RelationDefinition(null, 'item', function ($target, $src) use (&$i) {
+            $this->assertEquals(null, $target);
+            $i += $src;
+        });
+        $hub
+            ->addDefinition($d1)
+            ->addDefinition($rel);
+
+        $this->assertEquals(2, $hub->get('item'));
+        $this->assertEquals(1 + 2, $i);
     }
 
     public function testSetReadonly()
@@ -127,7 +144,9 @@ class HubTest extends TestCase
                 'c' => 'C'
             ])
             ->define('concat')
-            ->uses(['a','b','c'], function(&$t, $s){$t.=$s;});
+            ->uses(['a', 'b', 'c'], function (&$t, $s) {
+                $t .= $s;
+            });
         $this->assertEquals('ABC', $hub->get('concat'));
         $this->expectException(CanNotRemoveDefinitionException::class);
         $hub->remove('c');
@@ -143,7 +162,9 @@ class HubTest extends TestCase
                 'c' => 'C'
             ])
             ->define('concat')
-            ->uses(['a','b','c'], function(&$t, $s){$t.=$s;});
+            ->uses(['a', 'b', 'c'], function (&$t, $s) {
+                $t .= $s;
+            });
         $hub->remove('concat');
         $this->assertFalse($hub->has('concat'));
         // @todo will fail

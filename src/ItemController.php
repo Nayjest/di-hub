@@ -14,7 +14,7 @@ class ItemController
     /**
      * @var ItemDefinition
      */
-    public $definition;
+    private $definition;
 
     private $initialized = false;
 

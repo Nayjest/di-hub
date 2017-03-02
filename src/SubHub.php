@@ -21,9 +21,14 @@ class SubHub implements HubInterface
 {
     /** @var Hub */
     private $hub;
+
     /** @var  Hub */
     private $externalHub;
+
+    /** @var string */
     private $prefix;
+
+    /** @var  DefinitionBuilder */
     private $builderInstance;
 
     public function __construct($namePrefix, Hub $internalHub, Hub $externalHub = null)
@@ -35,11 +40,16 @@ class SubHub implements HubInterface
         }
     }
 
+    public function getId()
+    {
+        return $this->prefix . 'hub';
+    }
+
     public function register(HubInterface $externalHub)
     {
         $this->externalHub = $externalHub;
 
-        $externalHub->builder()->define($this->prefix, $this);
+        $externalHub->builder()->define($this->getId(), $this);
 
         $reflection = new ReflectionClass(Hub::class);
         $itemsProperty = $reflection->getProperty('items');

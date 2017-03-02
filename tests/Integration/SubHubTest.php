@@ -22,9 +22,10 @@ class SubHubTest extends TestCase
 
     public function testRegister()
     {
-        $id = 'subhub';
-        new SubHub($id, new Hub, $this->hub);
-        $this->assertTrue($this->hub->has($id));
+
+        $subHub = new SubHub('nested_', new Hub, $this->hub);
+        $this->assertTrue($this->hub->has('nested_hub'));
+        $this->assertEquals($subHub, $this->hub->get('nested_hub'));
     }
 
     public function testAccessPredefined()

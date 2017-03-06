@@ -3,7 +3,6 @@
 namespace Nayjest\DI\Internal;
 
 use Nayjest\DI\Exception\AlreadyDefinedException;
-use Nayjest\DI\Internal\ItemController;
 use Nayjest\DI\Definition\RelationDefinition;
 
 /**

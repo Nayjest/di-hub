@@ -1,8 +1,10 @@
 <?php
 
-namespace Nayjest\DI;
+namespace Nayjest\DI\Internal;
 
 use Nayjest\DI\Exception\ReadonlyException;
+use Nayjest\DI\Definition\ItemDefinition;
+use Nayjest\DI\Internal\RelationController;
 
 /**
  * Class Item

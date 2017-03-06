@@ -1,6 +1,6 @@
 <?php
 
-namespace Nayjest\DI;
+namespace Nayjest\DI\Definition;
 
 /**
  * Class Definition.

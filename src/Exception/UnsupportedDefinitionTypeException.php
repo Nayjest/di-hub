@@ -3,7 +3,7 @@
 namespace Nayjest\DI\Exception;
 
 use InvalidArgumentException;
-use Nayjest\DI\DefinitionInterface;
+use Nayjest\DI\Definition\DefinitionInterface;
 
 class UnsupportedDefinitionTypeException extends InvalidArgumentException implements HubException
 {

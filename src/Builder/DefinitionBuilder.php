@@ -1,6 +1,9 @@
 <?php
 
-namespace Nayjest\DI;
+namespace Nayjest\DI\Builder;
+
+use Nayjest\DI\Definition\DefinitionInterface;
+use Nayjest\DI\HubInterface;
 
 class DefinitionBuilder extends AbstractDefinitionBuilder
 {

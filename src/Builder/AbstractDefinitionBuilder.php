@@ -1,8 +1,11 @@
 <?php
 
-namespace Nayjest\DI;
+namespace Nayjest\DI\Builder;
 
+use Nayjest\DI\Definition\DefinitionInterface;
 use Nayjest\DI\Exception\DefinitionBuilderException;
+use Nayjest\DI\Definition\ItemDefinition;
+use Nayjest\DI\Definition\RelationDefinition;
 
 abstract class AbstractDefinitionBuilder
 {

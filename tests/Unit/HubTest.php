@@ -2,9 +2,9 @@
 
 namespace Nayjest\DI\Test\Unit;
 
-use Nayjest\DI\DefinitionInterface;
+use Nayjest\DI\Definition\DefinitionInterface;
 use Nayjest\DI\Exception\UnsupportedDefinitionTypeException;
-use Nayjest\DI\ItemDefinition;
+use Nayjest\DI\Definition\ItemDefinition;
 use Nayjest\DI\Exception\AlreadyDefinedException;
 use Nayjest\DI\Exception\NotFoundException;
 use Nayjest\DI\Hub;
@@ -42,7 +42,7 @@ class HubTest extends TestCase
     /**
      * @param string $id
      * @param null $value
-     * @return PHPUnit_Framework_MockObject_MockObject|ItemDefinition
+     * @return PHPUnit_Framework_MockObject_MockObject|\Nayjest\DI\Definition\ItemDefinition
      */
     protected function mockDefinition($id, $value = null)
     {

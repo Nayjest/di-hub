@@ -3,6 +3,8 @@
 namespace Nayjest\DI;
 
 use Interop\Container\ContainerInterface;
+use Nayjest\DI\Builder\DefinitionBuilder;
+use Nayjest\DI\Definition\DefinitionInterface;
 
 interface HubInterface extends ContainerInterface
 {

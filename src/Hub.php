@@ -1,10 +1,16 @@
 <?php
 namespace Nayjest\DI;
 
+use Nayjest\DI\Builder\DefinitionBuilder;
+use Nayjest\DI\Definition\DefinitionInterface;
+use Nayjest\DI\Definition\ItemDefinition;
+use Nayjest\DI\Definition\RelationDefinition;
 use Nayjest\DI\Exception\AlreadyDefinedException;
 use Nayjest\DI\Exception\CanNotRemoveDefinitionException;
 use Nayjest\DI\Exception\NotFoundException;
 use Nayjest\DI\Exception\UnsupportedDefinitionTypeException;
+use Nayjest\DI\Internal\ItemController;
+use Nayjest\DI\Internal\RelationController;
 
 class Hub implements HubInterface
 {

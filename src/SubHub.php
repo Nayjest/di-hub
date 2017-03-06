@@ -2,7 +2,13 @@
 
 namespace Nayjest\DI;
 
+use Nayjest\DI\Builder\DefinitionBuilder;
+use Nayjest\DI\Definition\DefinitionInterface;
+use Nayjest\DI\Definition\ItemDefinition;
+use Nayjest\DI\Definition\RelationDefinition;
 use Nayjest\DI\Exception\UnsupportedDefinitionTypeException;
+use Nayjest\DI\Internal\ItemControllerWrapper;
+use Nayjest\DI\Internal\RelationController;
 use ReflectionClass;
 
 /**

@@ -5,9 +5,9 @@ namespace Nayjest\DI\Test\Integration;
 use Nayjest\DI\Exception\CanNotRemoveDefinitionException;
 use Nayjest\DI\Exception\NotFoundException;
 use Nayjest\DI\Exception\ReadonlyException;
-use Nayjest\DI\ItemDefinition;
+use Nayjest\DI\Definition\ItemDefinition;
 use Nayjest\DI\Hub;
-use Nayjest\DI\RelationDefinition;
+use Nayjest\DI\Definition\RelationDefinition;
 use PHPUnit\Framework\TestCase;
 
 class HubTest extends TestCase

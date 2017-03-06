@@ -1,8 +1,10 @@
 <?php
 
-namespace Nayjest\DI;
+namespace Nayjest\DI\Builder;
 
+use Nayjest\DI\Definition\DefinitionInterface;
 use Nayjest\DI\Exception\DefinitionBuilderException;
+use Nayjest\DI\HubInterface;
 
 /**
  * Builds definitions that can be added to hub later using "register($hub)" method.
@@ -15,7 +17,7 @@ class DeferredDefinitionBuilder extends AbstractDefinitionBuilder
      */
     private $hub;
 
-    /** @var DefinitionInterface[] */
+    /** @var \Nayjest\DI\Definition\DefinitionInterface[] */
     private $definitions = [];
 
     public function register(HubInterface $hub)

@@ -102,7 +102,7 @@ class RelationController
     {
         if ($relation->source === null) {
             $source = null;
-        } elseif(array_key_exists($relation->source, $this->items)) {
+        } elseif (array_key_exists($relation->source, $this->items)) {
             $source = $this->items[$relation->source]->get($initializeSource);
         } else {
             throw new NotFoundException(

@@ -4,6 +4,7 @@ namespace Nayjest\DI\Internal;
 
 use Nayjest\DI\Exception\AlreadyDefinedException;
 use Nayjest\DI\Definition\RelationDefinition;
+use Nayjest\DI\Exception\NotFoundException;
 
 /**
  * Class RelationController
@@ -99,7 +100,15 @@ class RelationController
 
     protected function handleRelation(RelationDefinition $relation, $initializeSource, $prevSourceValue = null)
     {
-        $source = $relation->source ? $this->items[$relation->source]->get($initializeSource) : null;
+        if ($relation->source === null) {
+            $source = null;
+        } elseif(array_key_exists($relation->source, $this->items)) {
+            $source = $this->items[$relation->source]->get($initializeSource);
+        } else {
+            throw new NotFoundException(
+                "Item '$relation->source' not found. It's required to update '$relation->target'."
+            );
+        }
         if ($relation->target === null) {
             $target = null;
         } else {

@@ -166,4 +166,17 @@ class HubTest extends TestCase
         $this->hub->addDefinition($definition);
         $this->assertEquals('test-val', $this->hub->get('test-id'));
     }
+
+    public function testNotExistingRelationSource()
+    {
+        $relation = $this->createMock(RelationDefinition::class);
+        $relation->source = 'src';
+        $relation->target = 'target';
+        $this->hub->addDefinitions([
+            $relation,
+            $this->mockItemDefinition('target')
+        ]);
+        $this->expectException(NotFoundException::class);
+        $this->hub->get('target');
+    }
 }

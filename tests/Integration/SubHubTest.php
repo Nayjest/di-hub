@@ -158,47 +158,54 @@ class SubHubTest extends TestCase
 
     public function testExternalOnInternalDependency()
     {
+
+        $internalHub = new Hub([
+            new ItemDefinition('item', 'val'),
+            new ItemDefinition('title'),
+            new RelationDefinition('title', 'item', function(&$target, $source) {$target = ucfirst($source);})
+        ]);
+
+        $externalHub = $this->hub;
+
         $id = 'subhub';
-        $internalHub = new Hub;
-        $internalHub
-            ->builder()
-            ->define('item', 'val')
-            ->usedBy('title', function(&$target, $src) {
-                $target = ucfirst($src);
-            })
-            ->define('title', null, true);
+        $subHub = new SubHub("$id.", $internalHub, $externalHub);
 
-        $subHub = new SubHub("$id.", $internalHub);
-        $subHub->register($this->hub);
+        $fn = function(&$target, $source) { $target = $source . '!'; };
+        $externalHub->addDefinitions([
+            new ItemDefinition('final'),
+            new ItemDefinition('final2'),
+            new RelationDefinition('final', "$id.title", $fn),
+            new RelationDefinition('final2', 'final', $fn),
+        ]);
 
-        $this->hub->builder()
-            ->define('final', null, true)
-            ->uses(
-            "$id.title",
-            function(&$target, $src) {
-                $target = $src . '!';
-            }
-        );
-        $this->assertEquals('Val!', $this->hub->get("final"));
+        $this->assertEquals('Val!', $externalHub->get("final"));
 
         $this->hub->set("$id.item", 'val1');
-        $this->assertEquals('Val1!', $this->hub->get("final"));
+        $this->assertEquals('Val1!', $externalHub->get("final"));
+        $this->assertEquals('Val1!!', $externalHub->get("final2"));
 
         $subHub->set("item", 'val2');
-        $this->assertEquals('Val2!', $this->hub->get("final"));
+        $this->assertEquals('Val2!!', $externalHub->get("final2"));
+        $this->assertEquals('Val2!', $externalHub->get("final"));
+
+        $externalHub->set('final', 'will_be_rewritten');
+        $this->assertEquals('Val2!!', $externalHub->get("final2"));
+        $this->assertEquals('Val2!', $externalHub->get("final"));
+
     }
 
     public function testInternalOnExternalDependency()
     {
         $id = 'subhub';
+        $externalHub = $this->hub;
         $internalHub = new Hub;
         $internalHub
             ->builder()
             ->define('item', 'val');
         $subHub = new SubHub("$id.", $internalHub);
-        $subHub->register($this->hub);
+        $subHub->register($externalHub);
 
-        $this->hub->builder()
+        $externalHub->builder()
             ->define('external', '1')
             ->usedBy(
                 "$id.item",
@@ -206,19 +213,19 @@ class SubHubTest extends TestCase
                     $target .= ".$src";
                 }
             );
-        $this->assertEquals('val.1', $this->hub->get("$id.item"));
+        $this->assertEquals('val.1', $externalHub->get("$id.item"));
         $this->assertEquals('val.1', $subHub->get("item"));
         $this->assertEquals('val.1', $internalHub->get("item"));
-        $this->hub->set('external', 2);
-        $this->assertEquals('val.1.2', $this->hub->get("$id.item"));
+        $externalHub->set('external', 2);
+        $this->assertEquals('val.1.2', $externalHub->get("$id.item"));
         $this->assertEquals('val.1.2', $subHub->get("item"));
         $this->assertEquals('val.1.2', $internalHub->get("item"));
-        $this->hub->set("$id.item", 'updated');
-        $this->assertEquals('updated.2', $this->hub->get("$id.item"));
+        $externalHub->set("$id.item", 'updated');
+        $this->assertEquals('updated.2', $externalHub->get("$id.item"));
         $this->assertEquals('updated.2', $subHub->get("item"));
         $this->assertEquals('updated.2', $internalHub->get("item"));
         $internalHub->set("item", 'updated2');
-        $this->assertEquals('updated2.2', $this->hub->get("$id.item"));
+        $this->assertEquals('updated2.2', $externalHub->get("$id.item"));
         $this->assertEquals('updated2.2', $subHub->get("item"));
         $this->assertEquals('updated2.2', $internalHub->get("item"));
     }

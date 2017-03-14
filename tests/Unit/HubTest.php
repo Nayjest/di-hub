@@ -145,12 +145,8 @@ class HubTest extends TestCase
 
 
         $this->hub->set('initialized_target', 'new_target_val');
-        // handler not called again
-        // todo: review this behavior, possible bugs
-        $this->assertEquals(2, count($callLog));
-
-        $res = $this->hub->get('initialized_target');
-        $this->assertEquals('new_target_val', $res);
+        // handler must be called again
+        // because setting already initialized items always calls it's reinitialization
         $this->assertEquals(3, count($callLog));
         // prev = null
         // todo: review this behavior, possible bugs

@@ -42,8 +42,9 @@ class ItemController
             throw new ReadonlyException("Can't modify {$this->definition->id}, it's marked as readonly.");
         }
         $this->definition->source = $this->wrapIfCallable($value);
-        $this->initialized = false;
-        $this->initializeIfUsed();
+        if ($this->initialized) {
+            $this->initialize();
+        }
     }
 
     public function &get($initialize = true)

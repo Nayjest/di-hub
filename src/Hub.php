@@ -66,7 +66,7 @@ class Hub implements HubInterface
     }
 
 
-    public function get($id)
+    public function &get($id)
     {
         if (!$this->has($id)) {
             throw new NotFoundException;

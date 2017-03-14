@@ -37,12 +37,7 @@ class ItemControllerWrapper
 
     public function set($value)
     {
-        $oldValue = $this->isInitialized() ? $this->get() : null;
         $this->item->set($value);
-        $this->initializeIfUsed();
-        if ($this->isInitialized()) {
-            $this->relationController->onInitialize($this->id, $oldValue);
-        }
     }
 
     public function &get($initialize = true)

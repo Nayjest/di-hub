@@ -144,7 +144,7 @@ class SubHub implements HubInterface
         return $this->builderInstance;
     }
 
-    public function get($id)
+    public function &get($id)
     {
         if ($this->externalHub) {
             # Definitions can be delegated to external hub

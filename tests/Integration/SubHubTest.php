@@ -3,7 +3,6 @@
 namespace Nayjest\DI\Test\Integration;
 
 use Nayjest\DI\Hub;
-use Nayjest\DI\HubInterface;
 use Nayjest\DI\Definition\ItemDefinition;
 use Nayjest\DI\Definition\RelationDefinition;
 use Nayjest\DI\SubHub;

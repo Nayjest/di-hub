@@ -15,7 +15,7 @@ use Nayjest\DI\Internal\RelationController;
 class Hub implements HubInterface
 {
     /** @var ItemController[] */
-    private $items = [];
+    private $items;
 
     private $relationController;
 
@@ -23,6 +23,7 @@ class Hub implements HubInterface
 
     public function __construct(array $definitions = null)
     {
+        $this->items = [];
         $this->relationController = new RelationController($this->items);
         if ($definitions !== null) {
             $this->addDefinitions($definitions);
@@ -65,13 +66,20 @@ class Hub implements HubInterface
         return $this;
     }
 
-
     public function &get($id)
     {
         if (!$this->has($id)) {
             throw new NotFoundException;
         }
-        return $this->items[$id]->get();
+        $item = $this->items[$id];
+        if ($item->isInitialized()) {
+            return $item->get();
+        } else {
+            $val =& $item->get();
+            $this->relationController->onInitialize($id, null);
+            return $val;
+        }
+        //return $this->items[$id]->get();
     }
 
     /**
@@ -88,7 +96,13 @@ class Hub implements HubInterface
         if (!$this->has($id)) {
             throw new NotFoundException;
         }
-        $this->items[$id]->set($value);
+        $item = $this->items[$id];
+        $wasInitialized = $item->isInitialized();
+        $prevVal = $wasInitialized?$item->get():null;
+        $item->set($value);
+        if ($wasInitialized) {
+            $this->relationController->onInitialize($id, $prevVal);
+        }
         return $this;
     }
 
@@ -104,12 +118,26 @@ class Hub implements HubInterface
         return array_key_exists($id, $this->items);
     }
 
+    /**
+     * @param string $id
+     * @return bool
+     */
+    public function isInitialized($id)
+    {
+        return $this->has($id) && $this->items[$id]->isInitialized();
+    }
+
     protected function addItemDefinition(ItemDefinition $definition)
     {
-        if ($this->has($definition->id)) {
-            throw new AlreadyDefinedException("Item '{$definition->id}' already defined.");
+        $id = $definition->id;
+        if ($this->has($id)) {
+            throw new AlreadyDefinedException("Item '{$id}' already defined.");
         }
-        $this->items[$definition->id] = new ItemController($definition, $this->relationController);
+        $this->items[$id] = new ItemController($definition);
+        if ($this->relationController->hasInitializedDependantFrom($id)) {
+            $this->items[$id]->get(true);
+            $this->relationController->onInitialize($id, null);
+        }
     }
 
     public function remove($id)

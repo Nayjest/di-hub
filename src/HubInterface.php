@@ -35,4 +35,10 @@ interface HubInterface extends ContainerInterface
      * @return DefinitionBuilder
      */
     public function builder();
+
+    /**
+     * @param string $id
+     * @return bool
+     */
+    public function isInitialized($id);
 }

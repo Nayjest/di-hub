@@ -194,7 +194,7 @@ class SubHubTest extends TestCase
 
     public function testInternalOnExternalDependency()
     {
-        $id = 'subhub';
+        $id = 's';
         $externalHub = new Hub;
         $internalHub = new Hub;
         $internalHub
@@ -222,7 +222,7 @@ class SubHubTest extends TestCase
         $this->assertEquals('updated.2', $externalHub->get("$id.item"));
         $this->assertEquals('updated.2', $subHub->get("item"));
         $this->assertEquals('updated.2', $internalHub->get("item"));
-        $internalHub->set("item", 'updated2');
+        $subHub->set("item", 'updated2');
         $this->assertEquals('updated2.2', $externalHub->get("$id.item"));
         $this->assertEquals('updated2.2', $subHub->get("item"));
         $this->assertEquals('updated2.2', $internalHub->get("item"));

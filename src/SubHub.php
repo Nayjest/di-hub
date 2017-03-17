@@ -6,6 +6,7 @@ use Nayjest\DI\Builder\DefinitionBuilder;
 use Nayjest\DI\Definition\DefinitionInterface;
 use Nayjest\DI\Definition\ItemDefinition;
 use Nayjest\DI\Definition\RelationDefinition;
+use Nayjest\DI\Exception\NotFoundException;
 use Nayjest\DI\Exception\UnsupportedDefinitionTypeException;
 use Nayjest\DI\Internal\ItemControllerWrapper;
 use Nayjest\DI\Internal\RelationController;
@@ -25,19 +26,20 @@ use ReflectionClass;
  */
 class SubHub implements HubInterface
 {
-    /** @var Hub */
-    private $hub;
-
-    /** @var  Hub */
-    private $externalHub;
 
     /** @var string */
     private $prefix;
 
+    /** @var Hub */
+    protected $hub;
+
+    /** @var  Hub */
+    protected $externalHub;
+
     /** @var  DefinitionBuilder */
     private $builderInstance;
 
-    public function __construct($namePrefix, Hub $internalHub, Hub $externalHub = null)
+    public function __construct($namePrefix, HubInterface $internalHub, HubInterface $externalHub = null)
     {
         $this->prefix = $namePrefix;
         $this->hub = $internalHub;
@@ -51,10 +53,19 @@ class SubHub implements HubInterface
         return $this->prefix . 'hub';
     }
 
+    protected function realExternalHub(HubInterface $hub)
+    {
+        while ($hub instanceof SubHub) {
+            $hub = $hub->hub;
+        }
+        return $hub;
+    }
+
     public function register(HubInterface $externalHub)
     {
         $this->externalHub = $externalHub;
-
+        //$realExternalHub = $externalHub;
+        $realExternalHub = $this->realExternalHub($externalHub);
         $externalHub->builder()->define($this->getId(), $this);
 
         $reflection = new ReflectionClass(Hub::class);
@@ -63,13 +74,13 @@ class SubHub implements HubInterface
         $relationControllerProperty = $reflection->getProperty('relationController');
         $relationControllerProperty->setAccessible(true);
         /** @var RelationController $externalRelationController */
-        $externalRelationController = $relationControllerProperty->getValue($externalHub);
+        $externalRelationController = $relationControllerProperty->getValue($realExternalHub);
         $internalItems = $itemsProperty->getValue($this->hub);
-        $externalItems = $itemsProperty->getValue($externalHub);
+        $externalItems = $itemsProperty->getValue($realExternalHub);
 
         foreach ($internalItems as $id => $item) {
             $externalId = $this->prefixedId($id);
-            $externalItems[$externalId] = new ItemControllerWrapper($item, $externalId, $externalRelationController);
+            $externalItems[$externalId] = new ItemControllerWrapper($id, $this->hub);
 
             # Define relation [item -> external.item]
             $this->hub->builder()->defineRelation(
@@ -80,7 +91,7 @@ class SubHub implements HubInterface
                 }
             );
         }
-        $itemsProperty->setValue($externalHub, $externalItems);
+        $itemsProperty->setValue($realExternalHub, $externalItems);
     }
 
     protected function prefixedId($id)
@@ -183,5 +194,12 @@ class SubHub implements HubInterface
             throw UnsupportedDefinitionTypeException::makeFor($definition);
         }
         $this->externalHub->addDefinition($externalDefinition);
+    }
+
+    public function isInitialized($id)
+    {
+        return $this->externalHub
+            ? $this->externalHub->isInitialized($this->prefixedId($id))
+            : $this->hub->isInitialized($id);
     }
 }

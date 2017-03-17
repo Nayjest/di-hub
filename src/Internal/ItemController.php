@@ -21,14 +21,9 @@ class ItemController
 
     private $value = null;
 
-    /** @var RelationController */
-    private $relationController;
-
-    public function __construct(ItemDefinition $definition, RelationController $relationController)
+    public function __construct(ItemDefinition $definition)
     {
         $this->definition = $definition;
-        $this->relationController = $relationController;
-        $this->initializeIfUsed();
     }
 
     public function isInitialized()
@@ -55,18 +50,9 @@ class ItemController
         return $this->value;
     }
 
-    protected function initializeIfUsed()
-    {
-        if ($this->relationController->hasInitializedDependantFrom($this->definition->id)) {
-            $this->initialize();
-        }
-    }
-
     protected function initialize()
     {
-        $oldValue = $this->value;
         $this->value = $this->readSource();
-        $this->relationController->onInitialize($this->definition->id, $oldValue);
         $this->initialized = true;
     }
 

@@ -170,4 +170,35 @@ class HubTest extends TestCase
         // @todo will fail
         //$hub->set('b', 'B2');
     }
+
+    public function testImmediateItemInitialization()
+    {
+        $hub = new Hub([
+            new ItemDefinition('target', 'initial_target_val'),
+        ]);
+        $hub->get('target');
+        $calls = 0;
+        $hub->builder()->defineRelation('target', 'src', function() use (&$calls){
+            $calls++;
+        });
+        $this->assertEquals(0, $calls);
+        $hub->builder()->define('src', 1);
+        $this->assertEquals(1, $calls);
+    }
+
+    public function testImmediateRelationHandle()
+    {
+        $hub = new Hub([
+            new ItemDefinition('target', 'initial_target_val'),
+            new ItemDefinition('src', 'initial_src_val'),
+        ]);
+        $hub->get('target');
+        $hub->get('src');
+        $calls = 0;
+        $hub->addDefinition(new RelationDefinition(
+            'target',
+            'src',function() use (&$calls){$calls++;}
+        ));
+        $this->assertEquals(1, $calls);
+    }
 }

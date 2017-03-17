@@ -1,6 +1,7 @@
 <?php
 
 namespace Nayjest\DI\Internal;
+use Nayjest\DI\HubInterface;
 
 /**
  * Class ItemControllerWrapper
@@ -11,44 +12,38 @@ namespace Nayjest\DI\Internal;
  */
 class ItemControllerWrapper
 {
-    /** @var RelationController */
-    private $relationController;
     /**
-     * @var ItemController
+     * @var
      */
-    private $item;
-    private $id;
+    private $internalId;
+    /**
+     * @var HubInterface
+     */
+    private $internalHub;
 
-    public function __construct(ItemController $item, $id, RelationController $relationController)
+    public function __construct($internalId, HubInterface $internalHub)
     {
-        $this->relationController = $relationController;
-        $this->item = $item;
-        $this->id = $id;
-        $this->initializeIfUsed();
-        if ($this->isInitialized()) {
-            $this->relationController->onInitialize($this->id, null);
-        }
+
+        $this->internalId = $internalId;
+        $this->internalHub = $internalHub;
     }
 
     public function isInitialized()
     {
-        return $this->item->isInitialized();
+        return $this->internalHub->isInitialized($this->internalId);
     }
 
     public function set($value)
     {
-        $this->item->set($value);
+        $this->internalHub->set($this->internalId, $value);
     }
 
     public function &get($initialize = true)
     {
-        return $this->item->get($initialize);
-    }
-
-    protected function initializeIfUsed()
-    {
-        if ($this->relationController->hasInitializedDependantFrom($this->id)) {
-            $this->item->get(true);
+        $val = null;
+        if ($this->isInitialized() || $initialize) {
+            $val =& $this->internalHub->get($this->internalId);
         }
+        return $val;
     }
 }

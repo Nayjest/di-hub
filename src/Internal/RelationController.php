@@ -46,6 +46,7 @@ class RelationController
                 // get() will call initialization
                 // and relation will be processed on init
                 $this->items[$source]->get();
+                $this->onInitialize($source, null);
             }
         }
     }

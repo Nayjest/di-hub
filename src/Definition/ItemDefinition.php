@@ -1,6 +1,7 @@
 <?php
 
 namespace Nayjest\DI\Definition;
+use Nayjest\DI\Internal\ItemControllerInterface;
 
 /**
  * Class Definition.
@@ -20,6 +21,13 @@ class ItemDefinition implements DefinitionInterface
      * @var callable|mixed
      */
     public $source;
+
+    /**
+     * It's possible to specify item controller instance.
+     * @internal
+     * @var ItemControllerInterface|null
+     */
+    public $controller = null;
 
     /**
      * ItemDefinition constructor.

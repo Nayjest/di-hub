@@ -10,7 +10,7 @@ use Nayjest\DI\Definition\ItemDefinition;
  *
  * @internal
  */
-class ItemController
+class ItemController implements ItemControllerInterface
 {
     /**
      * @var ItemDefinition

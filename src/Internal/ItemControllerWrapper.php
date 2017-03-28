@@ -1,6 +1,7 @@
 <?php
 
 namespace Nayjest\DI\Internal;
+use Exception;
 use Nayjest\DI\HubInterface;
 
 /**
@@ -10,16 +11,19 @@ use Nayjest\DI\HubInterface;
  *
  * @internal
  */
-class ItemControllerWrapper
+class ItemControllerWrapper implements ItemControllerInterface
 {
     /**
      * @var
      */
-    private $internalId;
+    public $internalId;
+
     /**
      * @var HubInterface
      */
     private $internalHub;
+
+    public $initializingNow = false;
 
     public function __construct($internalId, HubInterface $internalHub)
     {
@@ -35,14 +39,28 @@ class ItemControllerWrapper
 
     public function set($value)
     {
-        $this->internalHub->set($this->internalId, $value);
+        $this->initializingNow = true;
+        try {
+            $this->internalHub->set($this->internalId, $value);
+        } catch(Exception $e) {
+            $this->initializingNow = false;
+            throw $e;
+        }
+        $this->initializingNow = false;
     }
 
     public function &get($initialize = true)
     {
         $val = null;
         if ($this->isInitialized() || $initialize) {
-            $val =& $this->internalHub->get($this->internalId);
+            $this->initializingNow = !$this->isInitialized();
+            try {
+                $val =& $this->internalHub->get($this->internalId);
+            } catch(Exception $e) {
+                $this->initializingNow = false;
+                throw $e;
+            }
+            $this->initializingNow = false;
         }
         return $val;
     }

@@ -1,7 +1,6 @@
 <?php
 namespace Nayjest\DI;
 
-use Nayjest\DI\Builder\DefinitionBuilder;
 use Nayjest\DI\Definition\DefinitionInterface;
 use Nayjest\DI\Definition\ItemDefinition;
 use Nayjest\DI\Definition\RelationDefinition;
@@ -9,18 +8,17 @@ use Nayjest\DI\Exception\AlreadyDefinedException;
 use Nayjest\DI\Exception\CanNotRemoveDefinitionException;
 use Nayjest\DI\Exception\NotFoundException;
 use Nayjest\DI\Exception\UnsupportedDefinitionTypeException;
+use Nayjest\DI\Internal\AbstractHub;
 use Nayjest\DI\Internal\ItemController;
+use Nayjest\DI\Internal\ItemControllerInterface;
 use Nayjest\DI\Internal\RelationController;
 
-class Hub implements HubInterface
+/**
+ * Class Hub
+ *
+ */
+class Hub extends AbstractHub
 {
-    /** @var ItemController[] */
-    private $items;
-
-    private $relationController;
-
-    protected $builderInstance;
-
     public function __construct(array $definitions = null)
     {
         $this->items = [];
@@ -28,14 +26,6 @@ class Hub implements HubInterface
         if ($definitions !== null) {
             $this->addDefinitions($definitions);
         }
-    }
-
-    public function builder()
-    {
-        if ($this->builderInstance === null) {
-            $this->builderInstance = new DefinitionBuilder($this);
-        }
-        return $this->builderInstance;
     }
 
     /**
@@ -54,24 +44,9 @@ class Hub implements HubInterface
         return $this;
     }
 
-    /**
-     * @param ItemDefinition[] $definitions
-     * @return $this
-     */
-    public function addDefinitions(array $definitions)
-    {
-        foreach ($definitions as $definition) {
-            $this->addDefinition($definition);
-        }
-        return $this;
-    }
-
     public function &get($id)
     {
-        if (!$this->has($id)) {
-            throw new NotFoundException;
-        }
-        $item = $this->items[$id];
+        $item = $this->getItem($id);
         if ($item->isInitialized()) {
             return $item->get();
         } else {
@@ -79,7 +54,6 @@ class Hub implements HubInterface
             $this->relationController->onInitialize($id, null);
             return $val;
         }
-        //return $this->items[$id]->get();
     }
 
     /**
@@ -93,12 +67,9 @@ class Hub implements HubInterface
      */
     public function set($id, $value)
     {
-        if (!$this->has($id)) {
-            throw new NotFoundException;
-        }
-        $item = $this->items[$id];
+        $item = $this->getItem($id);
         $wasInitialized = $item->isInitialized();
-        $prevVal = $wasInitialized?$item->get():null;
+        $prevVal = $wasInitialized ? $item->get() : null;
         $item->set($value);
         if ($wasInitialized) {
             $this->relationController->onInitialize($id, $prevVal);
@@ -124,7 +95,12 @@ class Hub implements HubInterface
      */
     public function isInitialized($id)
     {
-        return $this->has($id) && $this->items[$id]->isInitialized();
+        return $this->has($id) && $this->getItem($id)->isInitialized();
+    }
+
+    public function getIds()
+    {
+        return array_keys($this->items);
     }
 
     protected function addItemDefinition(ItemDefinition $definition)
@@ -133,23 +109,36 @@ class Hub implements HubInterface
         if ($this->has($id)) {
             throw new AlreadyDefinedException("Item '{$id}' already defined.");
         }
-        $this->items[$id] = new ItemController($definition);
+        $this->items[$id] = $item = $definition->controller ?: new ItemController($definition);
         if ($this->relationController->hasInitializedDependantFrom($id)) {
-            $this->items[$id]->get(true);
+            $item->get(true);
             $this->relationController->onInitialize($id, null);
         }
     }
 
+    /**
+     * @param string $id
+     * @return $this
+     */
     public function remove($id)
     {
-        if (!$this->has($id)) {
-            throw new NotFoundException;
-        }
-        $canRemove = $this->relationController->canRemove($id) && !$this->items[$id]->isInitialized();
+        $canRemove = !$this->getItem($id)->isInitialized() && $this->relationController->canRemove($id);
         if (!$canRemove) {
             throw new CanNotRemoveDefinitionException;
         }
         unset($this->items[$id]);
         return $this;
+    }
+
+    /**
+     * @param string $id
+     * @return ItemControllerInterface
+     */
+    protected function getItem($id)
+    {
+        if (!$this->has($id)) {
+            throw new NotFoundException("Item '$id' not found");
+        }
+        return $this->items[$id];
     }
 }

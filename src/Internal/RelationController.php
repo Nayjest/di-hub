@@ -13,10 +13,11 @@ use Nayjest\DI\Exception\NotFoundException;
  */
 class RelationController
 {
-    /** @var ItemController[] */
+    /** @var ItemControllerInterface[] */
     private $items;
+
     /** @var RelationDefinition[] */
-    private $relations = [];
+    protected $relations = [];
 
     public function __construct(array &$items)
     {

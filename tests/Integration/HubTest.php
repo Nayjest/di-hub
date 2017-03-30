@@ -152,6 +152,23 @@ class HubTest extends TestCase
         $hub->remove('c');
     }
 
+    public function testRelationChain()
+    {
+        $handler = function(&$target, $src) {
+            $target = $target. "[$src]";
+        };
+        $hub = new Hub([
+            new ItemDefinition('root', 'Root'),
+            new ItemDefinition('a', 'A'),
+            new ItemDefinition('c', 'C'),
+            new ItemDefinition('b', 'B'),
+            new RelationDefinition('root', 'a', $handler),
+            new RelationDefinition('a', 'c', $handler),
+            new RelationDefinition('root', 'b', $handler),
+        ]);
+        $this->assertEquals('Root[A[C]][B]', $hub->get('root'));
+    }
+
     public function testRemoveThatUses()
     {
         $hub = new Hub();

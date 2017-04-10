@@ -1,6 +1,7 @@
 <?php
 
 namespace Nayjest\DI\Internal;
+
 use Exception;
 use Nayjest\DI\HubInterface;
 
@@ -42,7 +43,7 @@ class ItemControllerWrapper implements ItemControllerInterface
         $this->initializingNow = true;
         try {
             $this->internalHub->set($this->internalId, $value);
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             $this->initializingNow = false;
             throw $e;
         }
@@ -56,7 +57,7 @@ class ItemControllerWrapper implements ItemControllerInterface
             $this->initializingNow = !$this->isInitialized();
             try {
                 $val =& $this->internalHub->get($this->internalId);
-            } catch(Exception $e) {
+            } catch (Exception $e) {
                 $this->initializingNow = false;
                 throw $e;
             }

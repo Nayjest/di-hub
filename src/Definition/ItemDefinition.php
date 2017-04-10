@@ -1,6 +1,7 @@
 <?php
 
 namespace Nayjest\DI\Definition;
+
 use Nayjest\DI\Internal\ItemControllerInterface;
 
 /**

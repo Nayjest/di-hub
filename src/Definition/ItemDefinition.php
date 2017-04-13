@@ -17,7 +17,7 @@ class ItemDefinition implements DefinitionInterface
     public $readonly = false;
 
     /**
-     * Getter is called when value isn't initialized yet. It should return any value.
+     * If item source is callable, it's result will be used as value.
      *
      * @var callable|mixed
      */

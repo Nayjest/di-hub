@@ -108,7 +108,7 @@ class Hub extends AbstractHub
         if ($this->has($id)) {
             throw new AlreadyDefinedException("Item '{$id}' already defined.");
         }
-        $this->items[$id] = $item = $definition->controller ?: new ItemController($definition);
+        $this->items[$id] = $definition->controller ?: new ItemController($definition);
         if ($this->relationController->hasInitializedDependantFrom($id)) {
             $this->relationController->initialize($id, null);
         }

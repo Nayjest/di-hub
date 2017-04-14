@@ -10,7 +10,7 @@ use Nayjest\DI\Definition\RelationDefinition;
 abstract class AbstractDefinitionBuilder
 {
     /** @var  string|null */
-    private $currentItemId;
+    protected $currentItemId;
 
     abstract protected function addDefinition(DefinitionInterface $definition);
 

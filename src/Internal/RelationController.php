@@ -42,20 +42,18 @@ class RelationController
 
         if ($needHandleImmediate) {
             if ($this->items[$source]->isInitialized()) {
-                $this->handleRelation($definition, true);
+                $this->handleRelation($definition);
             } else {
-                // get() will call initialization
-                // and relation will be processed on init
-                $this->items[$source]->get();
-                $this->onInitialize($source, null);
+                $this->initialize($source, null);
             }
         }
     }
 
-    public function onInitialize($id, $prevValue)
+    public function initialize($id, $prevValue, RelationDefinition $fromRelation = null)
     {
+        $this->items[$id]->initialize();
         $this->handleDependencies($id);
-        $this->notifyDependant($id, $prevValue);
+        $this->notifyDependant($id, $prevValue, $fromRelation);
     }
 
     public function canRemove($id)
@@ -76,14 +74,17 @@ class RelationController
     protected function handleDependencies($id)
     {
         foreach ($this->getRelationsByTarget($id) as $relation) {
-            $this->handleRelation($relation, true, null);
+            $this->handleRelation($relation, null);
         }
     }
 
-    protected function notifyDependant($id, $prevValue)
+    protected function notifyDependant($id, $prevValue, RelationDefinition $excluded = null)
     {
         $propagated = [];
         foreach ($this->getRelationsBySource($id) as $relation) {
+            if ($relation === $excluded) {
+                continue;
+            }
             if ($relation->target !== null) {
                 $targetItem = $this->items[$relation->target];
                 if (!$targetItem->isInitialized()) {
@@ -93,19 +94,22 @@ class RelationController
                     $propagated[$relation->target] = $targetItem->get();
                 }
             }
-            $this->handleRelation($relation, false, $prevValue);
+            $this->handleRelation($relation, $prevValue);
         }
         foreach ($propagated as $updatedId => $valueBeforeUpdate) {
             $this->notifyDependant($updatedId, $valueBeforeUpdate);
         }
     }
 
-    protected function handleRelation(RelationDefinition $relation, $initializeSource, $prevSourceValue = null)
+    protected function handleRelation(RelationDefinition $relation, $prevSourceValue = null)
     {
         if ($relation->source === null) {
             $source = null;
         } elseif (array_key_exists($relation->source, $this->items)) {
-            $source = $this->items[$relation->source]->get($initializeSource);
+            if (!$this->items[$relation->source]->isInitialized()) {
+                $this->initialize($relation->source, null, $relation);
+            }
+            $source = $this->items[$relation->source]->get();
         } else {
             throw new NotFoundException(
                 "Item '$relation->source' not found. It's required to update '$relation->target'."
@@ -114,7 +118,7 @@ class RelationController
         if ($relation->target === null) {
             $target = null;
         } else {
-            $target = &$this->items[$relation->target]->get(false);
+            $target = &$this->items[$relation->target]->get();
         }
         call_user_func_array($relation->handler, [
             &$target,

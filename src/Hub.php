@@ -47,13 +47,10 @@ class Hub extends AbstractHub
     public function &get($id)
     {
         $item = $this->getItem($id);
-        if ($item->isInitialized()) {
-            return $item->get();
-        } else {
-            $val =& $item->get();
-            $this->relationController->onInitialize($id, null);
-            return $val;
+        if (!$item->isInitialized()) {
+            $this->relationController->initialize($id, null);
         }
+        return $item->get();
     }
 
     /**
@@ -68,11 +65,13 @@ class Hub extends AbstractHub
     public function set($id, $value)
     {
         $item = $this->getItem($id);
-        $wasInitialized = $item->isInitialized();
-        $prevVal = $wasInitialized ? $item->get() : null;
-        $item->set($value);
-        if ($wasInitialized) {
-            $this->relationController->onInitialize($id, $prevVal);
+
+        if ($item->isInitialized()) {
+            $prevVal = $item->get();
+            $item->set($value);
+            $this->relationController->initialize($id, $prevVal);
+        } else {
+            $item->set($value);
         }
         return $this;
     }
@@ -111,8 +110,7 @@ class Hub extends AbstractHub
         }
         $this->items[$id] = $item = $definition->controller ?: new ItemController($definition);
         if ($this->relationController->hasInitializedDependantFrom($id)) {
-            $item->get(true);
-            $this->relationController->onInitialize($id, null);
+            $this->relationController->initialize($id, null);
         }
     }
 

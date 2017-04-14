@@ -2,6 +2,7 @@
 
 namespace Nayjest\DI\Internal;
 
+use Nayjest\DI\Exception\InternalErrorException;
 use Nayjest\DI\Exception\ReadonlyException;
 use Nayjest\DI\Definition\ItemDefinition;
 
@@ -37,20 +38,19 @@ class ItemController implements ItemControllerInterface
             throw new ReadonlyException("Can't modify {$this->definition->id}, it's marked as readonly.");
         }
         $this->definition->source = $this->wrapIfCallable($value);
-        if ($this->initialized) {
-            $this->initialize();
-        }
     }
 
-    public function &get($initialize = true)
+    public function &get()
     {
-        if ($initialize && !$this->initialized) {
-            $this->initialize();
+        if (!$this->isInitialized()) {
+            throw new InternalErrorException(
+                "Trying to read uninitialized item {$this->definition->id}"
+            );
         }
         return $this->value;
     }
 
-    protected function initialize()
+    public function initialize()
     {
         $this->value = $this->readSource();
         $this->initialized = true;

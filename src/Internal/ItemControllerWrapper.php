@@ -2,7 +2,7 @@
 
 namespace Nayjest\DI\Internal;
 
-use Exception;
+use Nayjest\DI\Exception\InternalErrorException;
 use Nayjest\DI\HubInterface;
 
 /**
@@ -28,7 +28,6 @@ class ItemControllerWrapper implements ItemControllerInterface
 
     public function __construct($internalId, HubInterface $internalHub)
     {
-
         $this->internalId = $internalId;
         $this->internalHub = $internalHub;
     }
@@ -43,26 +42,25 @@ class ItemControllerWrapper implements ItemControllerInterface
         $this->initializingNow = true;
         try {
             $this->internalHub->set($this->internalId, $value);
-        } catch (Exception $e) {
+        } finally {
             $this->initializingNow = false;
-            throw $e;
         }
-        $this->initializingNow = false;
     }
 
-    public function &get($initialize = true)
+    public function &get()
     {
-        $val = null;
-        if ($this->isInitialized() || $initialize) {
-            $this->initializingNow = !$this->isInitialized();
-            try {
-                $val =& $this->internalHub->get($this->internalId);
-            } catch (Exception $e) {
-                $this->initializingNow = false;
-                throw $e;
-            }
-            $this->initializingNow = false;
+        if (!$this->isInitialized()) {
+            throw new InternalErrorException(
+                "Trying to read uninitialized item {$this->internalId} via ItemControllerWrapper"
+            );
         }
-        return $val;
+        return $this->internalHub->get($this->internalId);
+    }
+
+    public function initialize()
+    {
+        $this->initializingNow = !$this->isInitialized();
+        $this->internalHub->get($this->internalId);
+        $this->initializingNow = false;
     }
 }

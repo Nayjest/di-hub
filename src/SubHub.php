@@ -7,6 +7,7 @@ use Nayjest\DI\Definition\ItemDefinition;
 use Nayjest\DI\Definition\RelationDefinition;
 use Nayjest\DI\Internal\AbstractHub;
 use Nayjest\DI\Internal\ItemControllerWrapper;
+use SplObjectStorage;
 
 /**
  * Class SubHub
@@ -22,6 +23,10 @@ use Nayjest\DI\Internal\ItemControllerWrapper;
  */
 class SubHub extends HubWrapper
 {
+    /**
+     * @var SplObjectStorage SubHubs indexed by its external hubs
+     */
+    private static $subHubs;
 
     /** @var string */
     private $prefix;
@@ -49,6 +54,7 @@ class SubHub extends HubWrapper
     public function register(HubInterface $externalHub)
     {
         $this->externalHub = $externalHub;
+        $this->replaceExternalHubsToThis();
         $externalHub->addDefinition(new ItemDefinition($this->getId(), $this));
         foreach ($this->hub->getIds() as $id) {
             $this->exposeItem($id);
@@ -120,12 +126,36 @@ class SubHub extends HubWrapper
     {
         /** @var ItemControllerWrapper $wrapper */
         $wrapper = $item->controller;
-        $handler = function ($target, $source, $prevSource) use ($item, $wrapper) {
+        $handler = function () use ($item, $wrapper) {
             if ($wrapper->initializingNow) {
                 return;
             }
-            $this->externalHub->relationController->onInitialize($item->id, $prevSource);
+            $prevSource = func_get_arg(2);
+            $this->externalHub->relationController->initialize($item->id, $prevSource);
         };
         return new RelationDefinition(null, $wrapper->internalId, $handler);
+    }
+
+    /**
+     * If its internal hub already used in other SubHubs as external hub,
+     * replaces it in other SubHubs to $this.
+     *
+     * This functionality allows building hub hierarchy staring from internal hubs.
+     * However, it not helps when building hub hierarchy staring from internal hubs and some hubs has multiple parents
+     * (external hubs).
+     * Therefore it's recommended to build hub hierarchy starting from top (external hubs, root hubs).
+     *
+     * Test (fails without this code): \Nayjest\DI\Test\Integration\SubSubHubTest::testConstructFromBottomThenRead()
+     */
+    protected function replaceExternalHubsToThis()
+    {
+        if (self::$subHubs === null) {
+            self::$subHubs = new SplObjectStorage();
+        }
+        self::$subHubs[$this->externalHub] = $this;
+
+        if (self::$subHubs->contains($this->hub)) {
+            self::$subHubs[$this->hub]->externalHub = $this;
+        }
     }
 }

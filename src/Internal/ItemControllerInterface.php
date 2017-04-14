@@ -13,11 +13,12 @@ interface ItemControllerInterface
     /**
      * 1) Throw Exception if definition is readonly
      * 2) Change definition source
-     * 3) Reinitialize if was initialized
      *
      * @param $value
      */
     public function set($value);
 
-    public function &get($initialize = true);
+    public function &get();
+
+    public function initialize();
 }

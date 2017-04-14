@@ -19,6 +19,10 @@ use Nayjest\DI\Internal\RelationController;
  */
 class Hub extends AbstractHub
 {
+    /**
+     * Hub constructor.
+     * @param DefinitionInterface[]|null $definitions
+     */
     public function __construct(array $definitions = null)
     {
         $this->items = [];
@@ -29,6 +33,8 @@ class Hub extends AbstractHub
     }
 
     /**
+     * Adds definition to hub.
+     *
      * @param DefinitionInterface $definition
      * @return $this
      */
@@ -44,6 +50,12 @@ class Hub extends AbstractHub
         return $this;
     }
 
+    /**
+     * Returns item by reference.
+     *
+     * @param string $id
+     * @return mixed
+     */
     public function &get($id)
     {
         $item = $this->getItem($id);
@@ -102,19 +114,9 @@ class Hub extends AbstractHub
         return array_keys($this->items);
     }
 
-    protected function addItemDefinition(ItemDefinition $definition)
-    {
-        $id = $definition->id;
-        if ($this->has($id)) {
-            throw new AlreadyDefinedException("Item '{$id}' already defined.");
-        }
-        $this->items[$id] = $definition->controller ?: new ItemController($definition);
-        if ($this->relationController->hasInitializedDependantFrom($id)) {
-            $this->relationController->initialize($id, null);
-        }
-    }
-
     /**
+     * Removes item from hub.
+     *
      * @param string $id
      * @return $this
      */
@@ -126,6 +128,18 @@ class Hub extends AbstractHub
         }
         unset($this->items[$id]);
         return $this;
+    }
+
+    protected function addItemDefinition(ItemDefinition $definition)
+    {
+        $id = $definition->id;
+        if ($this->has($id)) {
+            throw new AlreadyDefinedException("Item '{$id}' already defined.");
+        }
+        $this->items[$id] = $definition->controller ?: new ItemController($definition);
+        if ($this->relationController->hasInitializedDependantFrom($id)) {
+            $this->relationController->initialize($id, null);
+        }
     }
 
     /**

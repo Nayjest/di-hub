@@ -59,7 +59,13 @@ class Hub extends AbstractHub
     protected function makeMultiSourceRelation(RelationDefinition $multiSourceRelation)
     {
         $tempItemName = self::INTERNAL_DEFINITION_PREFIX . rand(1, PHP_INT_MAX - 1);
-        $tempItem = new ItemDefinition($tempItemName, array_fill_keys($multiSourceRelation->source, null));
+        $tempItem = new ItemDefinition($tempItemName, function () use ($multiSourceRelation) {
+            $data = [];
+            foreach ($multiSourceRelation->source as $sourceName) {
+                $data[$sourceName] = $this->get($sourceName);
+            }
+            return $data;
+        });
         $tmpToTargetRelation = new RelationDefinition(
             $multiSourceRelation->target,
             $tempItemName,

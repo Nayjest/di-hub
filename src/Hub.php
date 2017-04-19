@@ -50,7 +50,6 @@ class Hub extends AbstractHub
             } else {
                 $this->relationController->addRelation($definition);
             }
-
         } else {
             throw UnsupportedDefinitionTypeException::makeFor($definition);
         }

@@ -136,6 +136,9 @@ class HubTest extends TestCase
 
     public function testRemoveUsed()
     {
+        $f = function (&$t, $s) {
+            $t .= $s;
+        };
         $hub = new Hub();
         $hub->builder()
             ->defineMany([
@@ -144,9 +147,10 @@ class HubTest extends TestCase
                 'c' => 'C'
             ])
             ->define('concat')
-            ->uses(['a', 'b', 'c'], function (&$t, $s) {
-                $t .= $s;
-            });
+            ->uses('a', $f)
+            ->uses('b', $f)
+            ->uses('c', $f)
+        ;
         $this->assertEquals('ABC', $hub->get('concat'));
         $this->expectException(CanNotRemoveDefinitionException::class);
         $hub->remove('c');

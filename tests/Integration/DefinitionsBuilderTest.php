@@ -15,7 +15,8 @@ class DefinitionsBuilderTest extends TestCase
         };
         $hub->builder()
             ->define('intSum')
-            ->uses(['int1', 'int2'], $add)
+            ->uses('int1', $add)
+            ->uses('int2', $add)
             ->define('int1', 1)
             ->define('int2', 2)
         ;

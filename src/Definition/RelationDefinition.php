@@ -4,7 +4,7 @@ namespace Nayjest\DI\Definition;
 
 class RelationDefinition implements DefinitionInterface
 {
-    /** @var  string|null */
+    /** @var  string|null|array */
     public $source;
 
     /** @var  string */

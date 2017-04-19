@@ -19,6 +19,8 @@ use Nayjest\DI\Internal\RelationController;
  */
 class Hub extends AbstractHub
 {
+    const INTERNAL_DEFINITION_PREFIX = 'internal_';
+
     /**
      * Hub constructor.
      * @param DefinitionInterface[]|null $definitions
@@ -43,11 +45,46 @@ class Hub extends AbstractHub
         if ($definition instanceof ItemDefinition) {
             $this->addItemDefinition($definition);
         } elseif ($definition instanceof RelationDefinition) {
-            $this->relationController->addRelation($definition);
+            if (is_array($definition->source)) {
+                $this->makeMultiSourceRelation($definition);
+            } else {
+                $this->relationController->addRelation($definition);
+            }
+
         } else {
             throw UnsupportedDefinitionTypeException::makeFor($definition);
         }
         return $this;
+    }
+
+    protected function makeMultiSourceRelation(RelationDefinition $multiSourceRelation)
+    {
+        $tempItemName = self::INTERNAL_DEFINITION_PREFIX . rand(1, PHP_INT_MAX - 1);
+        $tempItem = new ItemDefinition($tempItemName, array_fill_keys($multiSourceRelation->source, null));
+        $tmpToTargetRelation = new RelationDefinition(
+            $multiSourceRelation->target,
+            $tempItemName,
+            function (&$target, $source) use ($multiSourceRelation) {
+                $arguments = [
+                    &$target
+                ];
+                foreach ($multiSourceRelation->source as $srcName) {
+                    $arguments[] = $source[$srcName];
+                }
+                call_user_func_array($multiSourceRelation->handler, $arguments);
+            }
+        );
+        $definitions = [
+            $tempItem,
+            $tmpToTargetRelation
+        ];
+        foreach ($multiSourceRelation->source as $srcName) {
+            $relation = new RelationDefinition($tempItemName, $srcName, function (&$target, $src) use ($srcName) {
+                $target[$srcName] = $src;
+            });
+            $definitions[] = $relation;
+        }
+        $this->addDefinitions($definitions);
     }
 
     /**

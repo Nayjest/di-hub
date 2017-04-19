@@ -40,12 +40,6 @@ abstract class AbstractDefinitionBuilder
 
     final public function uses($id, callable $func)
     {
-        if (is_array($id)) {
-            foreach ($id as $identifier) {
-                $this->uses($identifier, $func);
-            }
-            return $this;
-        }
         if ($this->currentItemId === null) {
             throw new DefinitionBuilderException("Can't call 'uses' method with no current item id");
         }
@@ -55,12 +49,6 @@ abstract class AbstractDefinitionBuilder
 
     final public function usedBy($id, callable $func)
     {
-        if (is_array($id)) {
-            foreach ($id as $identifier) {
-                $this->usedBy($identifier, $func);
-            }
-            return $this;
-        }
         if ($this->currentItemId === null) {
             throw new DefinitionBuilderException("Can't call 'uses' method with no current item id");
         }

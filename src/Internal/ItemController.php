@@ -4,7 +4,7 @@ namespace Nayjest\DI\Internal;
 
 use Nayjest\DI\Exception\InternalErrorException;
 use Nayjest\DI\Exception\ReadonlyException;
-use Nayjest\DI\Definition\ItemDefinition;
+use Nayjest\DI\Definition\Item;
 
 /**
  * Class Item
@@ -14,7 +14,7 @@ use Nayjest\DI\Definition\ItemDefinition;
 class ItemController implements ItemControllerInterface
 {
     /**
-     * @var ItemDefinition
+     * @var Item
      */
     private $definition;
 
@@ -22,7 +22,7 @@ class ItemController implements ItemControllerInterface
 
     private $value = null;
 
-    public function __construct(ItemDefinition $definition)
+    public function __construct(Item $definition)
     {
         $this->definition = $definition;
     }

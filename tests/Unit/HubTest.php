@@ -3,9 +3,9 @@
 namespace Nayjest\DI\Test\Unit;
 
 use Nayjest\DI\Definition\DefinitionInterface;
-use Nayjest\DI\Definition\RelationDefinition;
+use Nayjest\DI\Definition\Relation;
 use Nayjest\DI\Exception\UnsupportedDefinitionTypeException;
-use Nayjest\DI\Definition\ItemDefinition;
+use Nayjest\DI\Definition\Item;
 use Nayjest\DI\Exception\AlreadyDefinedException;
 use Nayjest\DI\Exception\NotFoundException;
 use Nayjest\DI\Hub;
@@ -43,12 +43,12 @@ class HubTest extends TestCase
     /**
      * @param string $id
      * @param null $value
-     * @return PHPUnit_Framework_MockObject_MockObject|\Nayjest\DI\Definition\ItemDefinition
+     * @return PHPUnit_Framework_MockObject_MockObject|\Nayjest\DI\Definition\Item
      */
     protected function mockItemDefinition($id, $value = null)
     {
-        /** @var PHPUnit_Framework_MockObject_MockObject|ItemDefinition $definition */
-        $definition = $this->createMock(ItemDefinition::class);
+        /** @var PHPUnit_Framework_MockObject_MockObject|Item $definition */
+        $definition = $this->createMock(Item::class);
         $definition->id = $id;
         $definition->relations = [];
         if ($value!== null) {
@@ -95,8 +95,8 @@ class HubTest extends TestCase
 
     public function testAddExistingRelationDefinition()
     {
-        /** @var PHPUnit_Framework_MockObject_MockObject|RelationDefinition $relation */
-        $relation = $this->createMock(RelationDefinition::class);
+        /** @var PHPUnit_Framework_MockObject_MockObject|Relation $relation */
+        $relation = $this->createMock(Relation::class);
         // should be ok
         $this->hub->addDefinition($relation);
 
@@ -115,8 +115,8 @@ class HubTest extends TestCase
         $res = $this->hub->get('initialized_target');
         $this->assertEquals('initial_target_val', $res);
 
-        /** @var PHPUnit_Framework_MockObject_MockObject|RelationDefinition $relation */
-        $relation = $this->createMock(RelationDefinition::class);
+        /** @var PHPUnit_Framework_MockObject_MockObject|Relation $relation */
+        $relation = $this->createMock(Relation::class);
         $relation->source = 'src';
         $relation->target = 'initialized_target';
         $callLog = [];
@@ -165,7 +165,7 @@ class HubTest extends TestCase
 
     public function testNotExistingRelationSource()
     {
-        $relation = $this->createMock(RelationDefinition::class);
+        $relation = $this->createMock(Relation::class);
         $relation->source = 'src';
         $relation->target = 'target';
         $this->hub->addDefinitions([

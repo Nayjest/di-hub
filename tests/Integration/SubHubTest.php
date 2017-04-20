@@ -3,8 +3,8 @@
 namespace Nayjest\DI\Test\Integration;
 
 use Nayjest\DI\Hub;
-use Nayjest\DI\Definition\ItemDefinition;
-use Nayjest\DI\Definition\RelationDefinition;
+use Nayjest\DI\Definition\Item;
+use Nayjest\DI\Definition\Relation;
 use Nayjest\DI\SubHub;
 use PHPUnit\Framework\TestCase;
 
@@ -51,8 +51,8 @@ class SubHubTest extends TestCase
         $this->assertEquals('val', $subHub->get("item"));
         $this->assertEquals('val', $hub->get("item"));
         $subHub->addDefinitions([
-            new ItemDefinition('item2', null),
-            new RelationDefinition('item2', 'item', function (&$target, $src) {
+            new Item('item2', null),
+            new Relation('item2', 'item', function (&$target, $src) {
                 $target = "$src!";
             })
         ]);
@@ -73,8 +73,8 @@ class SubHubTest extends TestCase
         $this->assertEquals('val', $subHub->get("item"));
         $this->assertEquals('val', $externalHub->get("s.item"));
         $subHub->addDefinitions([
-            new ItemDefinition('item2', null),
-            new RelationDefinition('item2', 'item', function (&$target, $src) {
+            new Item('item2', null),
+            new Relation('item2', 'item', function (&$target, $src) {
                 $target = "$src!";
             })
         ]);
@@ -154,9 +154,9 @@ class SubHubTest extends TestCase
     {
 
         $internalHub = new Hub([
-            new ItemDefinition('inner', 'val'),
-            new ItemDefinition('inner_dependant'),
-            new RelationDefinition('inner_dependant', 'inner', function (&$target, $source) {
+            new Item('inner', 'val'),
+            new Item('inner_dependant'),
+            new Relation('inner_dependant', 'inner', function (&$target, $source) {
                 $target = $source . '[i-i-rel]';
             })
         ]);
@@ -167,12 +167,12 @@ class SubHubTest extends TestCase
         $subHub = new SubHub("$id.", $internalHub, $externalHub);
 
         $externalHub->addDefinitions([
-            new ItemDefinition('outer'),
-            new ItemDefinition('outer2'),
-            new RelationDefinition('outer', "$id.inner_dependant", function (&$target, $source) {
+            new Item('outer'),
+            new Item('outer2'),
+            new Relation('outer', "$id.inner_dependant", function (&$target, $source) {
                 $target = $source . '[e-i-rel]';
             }),
-            new RelationDefinition('outer2', 'outer', function (&$target, $source) {
+            new Relation('outer2', 'outer', function (&$target, $source) {
                 $target = $source . '[e-e-rel]';
             }),
         ]);
@@ -204,7 +204,7 @@ class SubHubTest extends TestCase
         $externalHub = new Hub;
         $internalHub = new Hub;
 
-        $internalHub->addDefinition(new ItemDefinition('item_i', 'val'));
+        $internalHub->addDefinition(new Item('item_i', 'val'));
 
         $subHub = new SubHub("$id.", $internalHub);
         $subHub->register($externalHub);

@@ -3,7 +3,7 @@
 namespace Nayjest\DI\Test\Integration;
 
 use Nayjest\DI\Hub;
-use Nayjest\DI\Definition\ItemDefinition;
+use Nayjest\DI\Definition\Item;
 use Nayjest\DI\SubHub;
 use PHPUnit\Framework\TestCase;
 
@@ -21,7 +21,7 @@ class SubSubHubTest extends TestCase
         $h3 = new Hub;
         $h4 = new Hub;
 
-        $h1->addDefinition(new ItemDefinition('item1', 'h1_item1'));
+        $h1->addDefinition(new Item('item1', 'h1_item1'));
 
         $sh1 = new SubHub('h1.', $h1, $h2);
 
@@ -41,7 +41,7 @@ class SubSubHubTest extends TestCase
         $this->assertEquals('h1_item1', $sh3->get('h2.h1.item1'));
         $this->assertEquals('h1_item1', $h4->get('h3.h2.h1.item1'));
 
-        $sh1->addDefinition(new ItemDefinition('item2', 'h1_item2'));
+        $sh1->addDefinition(new Item('item2', 'h1_item2'));
         $this->assertEquals('h1_item2', $sh2->get('h1.item2'));
         $this->assertEquals('h1_item2', $sh3->get('h2.h1.item2'));
     }
@@ -58,13 +58,13 @@ class SubSubHubTest extends TestCase
         $sh2 = new SubHub('h2.', $h2, $h3);
         $sh3 = new SubHub('h3.', $h3, $h4);
 
-        $sh1->addDefinition(new ItemDefinition('item1', 'h1_item1'));
+        $sh1->addDefinition(new Item('item1', 'h1_item1'));
 
         $this->assertEquals('h1_item1', $sh1->get('item1'));
         $this->assertEquals('h1_item1', $sh2->get('h1.item1'));
         $this->assertEquals('h1_item1', $sh3->get('h2.h1.item1'));
         $this->assertEquals('h1_item1', $h4->get('h3.h2.h1.item1'));
-        $sh1->addDefinition(new ItemDefinition('item2', 'h1_item2'));
+        $sh1->addDefinition(new Item('item2', 'h1_item2'));
         $this->assertEquals('h1_item2', $h2->get('h1.item2'));
         $this->assertEquals('h1_item2', $h3->get('h2.h1.item2'));
     }
@@ -77,7 +77,7 @@ class SubSubHubTest extends TestCase
         $h3 = new Hub;
         $h4 = new Hub;
 
-        $h1->addDefinition(new ItemDefinition('item1', 'h1_item1'));
+        $h1->addDefinition(new Item('item1', 'h1_item1'));
 
         $sh1 = new SubHub('h1.', $h1, $h2);
         $sh2 = new SubHub('h2.', $h2, $h3);
@@ -114,7 +114,7 @@ class SubSubHubTest extends TestCase
         $h3 = new Hub;
         $h4 = new Hub;
 
-        $h1->addDefinition(new ItemDefinition('item1', 'h1_item1'));
+        $h1->addDefinition(new Item('item1', 'h1_item1'));
 
         $sh3 = new SubHub('h3.', $h3, $h4);
         $sh2 = new SubHub('h2.', $h2, $sh3);
@@ -137,7 +137,7 @@ class SubSubHubTest extends TestCase
         $sh2 = new SubHub('h2.', $h2, $sh3);
         $sh1 = new SubHub('h1.', $h1, $sh2);
 
-        $sh1->addDefinition(new ItemDefinition('i', 'v'));
+        $sh1->addDefinition(new Item('i', 'v'));
         $this->assertEquals('v', $sh2->get('h1.i'));
         $this->assertEquals('v', $sh3->get('h2.h1.i'));
         $this->assertEquals('v', $h4->get('h3.h2.h1.i'));

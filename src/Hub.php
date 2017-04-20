@@ -2,8 +2,8 @@
 namespace Nayjest\DI;
 
 use Nayjest\DI\Definition\DefinitionInterface;
-use Nayjest\DI\Definition\ItemDefinition;
-use Nayjest\DI\Definition\RelationDefinition;
+use Nayjest\DI\Definition\Item;
+use Nayjest\DI\Definition\Relation;
 use Nayjest\DI\Exception\AlreadyDefinedException;
 use Nayjest\DI\Exception\CanNotRemoveDefinitionException;
 use Nayjest\DI\Exception\NotFoundException;
@@ -42,9 +42,9 @@ class Hub extends AbstractHub
      */
     public function addDefinition(DefinitionInterface $definition)
     {
-        if ($definition instanceof ItemDefinition) {
+        if ($definition instanceof Item) {
             $this->addItemDefinition($definition);
-        } elseif ($definition instanceof RelationDefinition) {
+        } elseif ($definition instanceof Relation) {
             if (is_array($definition->source)) {
                 $this->makeMultiSourceRelation($definition);
             } else {
@@ -56,17 +56,17 @@ class Hub extends AbstractHub
         return $this;
     }
 
-    protected function makeMultiSourceRelation(RelationDefinition $multiSourceRelation)
+    protected function makeMultiSourceRelation(Relation $multiSourceRelation)
     {
         $tempItemName = self::INTERNAL_DEFINITION_PREFIX . rand(1, PHP_INT_MAX - 1);
-        $tempItem = new ItemDefinition($tempItemName, function () use ($multiSourceRelation) {
+        $tempItem = new Item($tempItemName, function () use ($multiSourceRelation) {
             $data = [];
             foreach ($multiSourceRelation->source as $sourceName) {
                 $data[$sourceName] = $this->get($sourceName);
             }
             return $data;
         });
-        $tmpToTargetRelation = new RelationDefinition(
+        $tmpToTargetRelation = new Relation(
             $multiSourceRelation->target,
             $tempItemName,
             function (&$target, $source) use ($multiSourceRelation) {
@@ -84,7 +84,7 @@ class Hub extends AbstractHub
             $tmpToTargetRelation
         ];
         foreach ($multiSourceRelation->source as $srcName) {
-            $relation = new RelationDefinition($tempItemName, $srcName, function (&$target, $src) use ($srcName) {
+            $relation = new Relation($tempItemName, $srcName, function (&$target, $src) use ($srcName) {
                 $target[$srcName] = $src;
             });
             $definitions[] = $relation;
@@ -172,7 +172,7 @@ class Hub extends AbstractHub
         return $this;
     }
 
-    protected function addItemDefinition(ItemDefinition $definition)
+    protected function addItemDefinition(Item $definition)
     {
         $id = $definition->id;
         if ($this->has($id)) {

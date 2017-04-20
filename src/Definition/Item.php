@@ -5,11 +5,9 @@ namespace Nayjest\DI\Definition;
 use Nayjest\DI\Internal\ItemControllerInterface;
 
 /**
- * Class Definition.
- * Stores item definition.
- *
+ * Item definition.
  */
-class ItemDefinition implements DefinitionInterface
+class Item implements DefinitionInterface
 {
     /** @var  string */
     public $id;

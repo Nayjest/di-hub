@@ -3,8 +3,8 @@
 namespace Nayjest\DI;
 
 use Nayjest\DI\Definition\DefinitionInterface;
-use Nayjest\DI\Definition\ItemDefinition;
-use Nayjest\DI\Definition\RelationDefinition;
+use Nayjest\DI\Definition\Item;
+use Nayjest\DI\Definition\Relation;
 use Nayjest\DI\Internal\AbstractHub;
 use Nayjest\DI\Internal\ItemControllerWrapper;
 use SplObjectStorage;
@@ -55,7 +55,7 @@ class SubHub extends HubWrapper
     {
         $this->externalHub = $externalHub;
         $this->replaceExternalHubsToThis();
-        $externalHub->addDefinition(new ItemDefinition($this->getId(), $this));
+        $externalHub->addDefinition(new Item($this->getId(), $this));
         foreach ($this->hub->getIds() as $id) {
             $this->exposeItem($id);
         }
@@ -98,7 +98,7 @@ class SubHub extends HubWrapper
     public function addDefinition(DefinitionInterface $definition)
     {
         parent::addDefinition($definition);
-        if ($this->externalHub && $definition instanceof ItemDefinition) {
+        if ($this->externalHub && $definition instanceof Item) {
             $this->exposeItem($definition->id);
         }
         return $this;
@@ -106,11 +106,11 @@ class SubHub extends HubWrapper
 
     /**
      * @param $internalId
-     * @return ItemDefinition
+     * @return Item
      */
     protected function makeExternalItemDefinition($internalId)
     {
-        $definition = new ItemDefinition($this->prefixedId($internalId));
+        $definition = new Item($this->prefixedId($internalId));
         $definition->controller = new ItemControllerWrapper($internalId, $this->hub);
         return $definition;
     }
@@ -122,7 +122,7 @@ class SubHub extends HubWrapper
         $this->hub->addDefinition($this->makeExternalInitCallerRelation($itemDefinition));
     }
 
-    protected function makeExternalInitCallerRelation(ItemDefinition $item)
+    protected function makeExternalInitCallerRelation(Item $item)
     {
         /** @var ItemControllerWrapper $wrapper */
         $wrapper = $item->controller;
@@ -133,7 +133,7 @@ class SubHub extends HubWrapper
             $prevSource = func_get_arg(2);
             $this->externalHub->relationController->initialize($item->id, $prevSource);
         };
-        return new RelationDefinition(null, $wrapper->internalId, $handler);
+        return new Relation(null, $wrapper->internalId, $handler);
     }
 
     /**

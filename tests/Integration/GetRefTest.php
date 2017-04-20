@@ -2,7 +2,7 @@
 
 namespace Nayjest\DI\Test\Integration;
 
-use Nayjest\DI\Definition\ItemDefinition;
+use Nayjest\DI\Definition\Item;
 use Nayjest\DI\Hub;
 use PHPUnit\Framework\TestCase;
 
@@ -12,7 +12,7 @@ class GetRefTest extends TestCase
     public function test()
     {
         $hub = new Hub([
-            new ItemDefinition('item',1)
+            new Item('item',1)
         ]);
         $ref = &$hub->get('item');
         $hub->set('item', 2);
@@ -22,7 +22,7 @@ class GetRefTest extends TestCase
     public function testExternalChange()
     {
         $hub = new Hub([
-            new ItemDefinition('item',1)
+            new Item('item',1)
         ]);
         $ref = &$hub->get('item');
 

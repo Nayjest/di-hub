@@ -3,7 +3,7 @@
 namespace Nayjest\DI\Internal;
 
 use Nayjest\DI\Exception\AlreadyDefinedException;
-use Nayjest\DI\Definition\RelationDefinition;
+use Nayjest\DI\Definition\Relation;
 use Nayjest\DI\Exception\NotFoundException;
 
 /**
@@ -16,7 +16,7 @@ class RelationController
     /** @var ItemControllerInterface[] */
     private $items;
 
-    /** @var RelationDefinition[] */
+    /** @var Relation[] */
     protected $relations = [];
 
     public function __construct(array &$items)
@@ -24,7 +24,7 @@ class RelationController
         $this->items = &$items;
     }
 
-    public function addRelation(RelationDefinition $definition)
+    public function addRelation(Relation $definition)
     {
         if (in_array($definition, $this->relations, true)) {
             throw new AlreadyDefinedException(
@@ -49,7 +49,7 @@ class RelationController
         }
     }
 
-    public function initialize($id, $prevValue, RelationDefinition $fromRelation = null)
+    public function initialize($id, $prevValue, Relation $fromRelation = null)
     {
         $this->items[$id]->initialize();
         $this->handleDependencies($id);
@@ -78,7 +78,7 @@ class RelationController
         }
     }
 
-    protected function notifyDependant($id, $prevValue, RelationDefinition $excluded = null)
+    protected function notifyDependant($id, $prevValue, Relation $excluded = null)
     {
         $propagated = [];
         foreach ($this->getRelationsBySource($id) as $relation) {
@@ -101,7 +101,7 @@ class RelationController
         }
     }
 
-    protected function handleRelation(RelationDefinition $relation, $prevSourceValue = null)
+    protected function handleRelation(Relation $relation, $prevSourceValue = null)
     {
         if ($relation->source === null) {
             $source = null;
@@ -129,7 +129,7 @@ class RelationController
 
     /**
      * @param $id
-     * @return RelationDefinition[]
+     * @return Relation[]
      */
     protected function getRelationsByTarget($id)
     {
@@ -144,7 +144,7 @@ class RelationController
 
     /**
      * @param $id
-     * @return RelationDefinition[]
+     * @return Relation[]
      */
     protected function getRelationsBySource($id)
     {

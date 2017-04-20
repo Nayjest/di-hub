@@ -4,8 +4,8 @@ namespace Nayjest\DI\Builder;
 
 use Nayjest\DI\Definition\DefinitionInterface;
 use Nayjest\DI\Exception\DefinitionBuilderException;
-use Nayjest\DI\Definition\ItemDefinition;
-use Nayjest\DI\Definition\RelationDefinition;
+use Nayjest\DI\Definition\Item;
+use Nayjest\DI\Definition\Relation;
 
 abstract class AbstractDefinitionBuilder
 {
@@ -27,14 +27,14 @@ abstract class AbstractDefinitionBuilder
 
     final public function define($id, $source = null, $readonly = false)
     {
-        $this->addDefinition(new ItemDefinition($id, $source, $readonly));
+        $this->addDefinition(new Item($id, $source, $readonly));
         $this->currentItemId = $id;
         return $this;
     }
 
     final public function defineRelation($target, $source, callable $func)
     {
-        $this->addDefinition(new RelationDefinition($target, $source, $func));
+        $this->addDefinition(new Relation($target, $source, $func));
         return $this;
     }
 
@@ -43,7 +43,7 @@ abstract class AbstractDefinitionBuilder
         if ($this->currentItemId === null) {
             throw new DefinitionBuilderException("Can't call 'uses' method with no current item id");
         }
-        $this->addDefinition(new RelationDefinition($this->currentItemId, $id, $func));
+        $this->addDefinition(new Relation($this->currentItemId, $id, $func));
         return $this;
     }
 
@@ -52,7 +52,7 @@ abstract class AbstractDefinitionBuilder
         if ($this->currentItemId === null) {
             throw new DefinitionBuilderException("Can't call 'uses' method with no current item id");
         }
-        $this->addDefinition(new RelationDefinition($id, $this->currentItemId, $func));
+        $this->addDefinition(new Relation($id, $this->currentItemId, $func));
         return $this;
     }
 }

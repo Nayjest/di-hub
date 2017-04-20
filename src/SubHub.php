@@ -36,6 +36,7 @@ class SubHub extends HubWrapper
 
     /**
      * SubHub constructor.
+     *
      * @param string $namePrefix
      * @param AbstractHub $internalHub
      * @param AbstractHub|null $externalHub
@@ -51,6 +52,9 @@ class SubHub extends HubWrapper
         }
     }
 
+    /**
+     * @param HubInterface $externalHub
+     */
     public function register(HubInterface $externalHub)
     {
         $this->externalHub = $externalHub;
@@ -61,14 +65,12 @@ class SubHub extends HubWrapper
         }
     }
 
+    /**
+     * @return string
+     */
     public function getId()
     {
         return $this->prefix . 'hub';
-    }
-
-    protected function prefixedId($id)
-    {
-        return ($id === null) ? null : $this->prefix . $id;
     }
 
     /**
@@ -102,6 +104,11 @@ class SubHub extends HubWrapper
             $this->exposeItem($definition->id);
         }
         return $this;
+    }
+
+    protected function prefixedId($id)
+    {
+        return ($id === null) ? null : $this->prefix . $id;
     }
 
     /**

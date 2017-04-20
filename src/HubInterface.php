@@ -42,5 +42,8 @@ interface HubInterface extends ContainerInterface
      */
     public function isInitialized($id);
 
+    /**
+     * @return string[]
+     */
     public function getIds();
 }

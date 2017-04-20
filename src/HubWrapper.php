@@ -12,11 +12,19 @@ class HubWrapper extends AbstractHub
      */
     protected $hub;
 
+    /**
+     * Constructor.
+     *
+     * @param HubInterface $hub
+     */
     public function __construct(HubInterface $hub)
     {
         $this->hub = $hub;
     }
 
+    /**
+     * @return string[]
+     */
     public function getIds()
     {
         return $this->hub->getIds();

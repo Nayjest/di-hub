@@ -2,42 +2,31 @@
 
 namespace Nayjest\DI\Definition;
 
-use Nayjest\DI\Internal\ItemControllerInterface;
-
 /**
  * Item definition.
  */
-class Item implements DefinitionInterface
+class Item extends Value implements DefinitionInterface
 {
-    /** @var  string */
-    public $id;
-
-    public $readonly = false;
+    /** @var Relation */
+    public $relation;
 
     /**
-     * If item source is callable, it's result will be used as value.
+     * Item constructor.
      *
-     * @var callable|mixed
-     */
-    public $source;
-
-    /**
-     * It's possible to specify item controller instance.
-     * @internal
-     * @var ItemControllerInterface|null
-     */
-    public $controller = null;
-
-    /**
-     * ItemDefinition constructor.
      * @param $id
-     * @param mixed|callable $source
-     * @param bool $readonly
+     * @param null|string|string[]|mixed $sourceDependencies
+     *        dependency id(s) as string or array or strings;
+     *        if $handler not passed to 3rd argument, will be used as value
+     * @param callable|null $handler
      */
-    public function __construct($id, $source = null, $readonly = false)
+    public function __construct($id, $sourceDependencies = null, callable $handler = null)
     {
-        $this->id = $id;
-        $this->source = $source;
-        $this->readonly = $readonly;
+        if ($handler) {
+            $source = null;
+            $this->relation = new Relation($id, $sourceDependencies, $handler);
+        } else {
+            $source = $sourceDependencies;
+        }
+        parent::__construct($id, $source);
     }
 }

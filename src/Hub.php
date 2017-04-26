@@ -3,6 +3,7 @@ namespace Nayjest\DI;
 
 use Nayjest\DI\Definition\DefinitionInterface;
 use Nayjest\DI\Definition\Item;
+use Nayjest\DI\Definition\Value;
 use Nayjest\DI\Definition\Relation;
 use Nayjest\DI\Exception\AlreadyDefinedException;
 use Nayjest\DI\Exception\CanNotRemoveDefinitionException;
@@ -42,7 +43,7 @@ class Hub extends AbstractHub
      */
     public function addDefinition(DefinitionInterface $definition)
     {
-        if ($definition instanceof Item) {
+        if ($definition instanceof Value) {
             $this->addItemDefinition($definition);
         } elseif ($definition instanceof Relation) {
             if (is_array($definition->source)) {
@@ -59,7 +60,7 @@ class Hub extends AbstractHub
     protected function makeMultiSourceRelation(Relation $multiSourceRelation)
     {
         $tempItemName = self::INTERNAL_DEFINITION_PREFIX . rand(1, PHP_INT_MAX - 1);
-        $tempItem = new Item($tempItemName, function () use ($multiSourceRelation) {
+        $tempItem = new Value($tempItemName, function () use ($multiSourceRelation) {
             $data = [];
             foreach ($multiSourceRelation->source as $sourceName) {
                 $data[$sourceName] = $this->get($sourceName);
@@ -172,13 +173,24 @@ class Hub extends AbstractHub
         return $this;
     }
 
-    protected function addItemDefinition(Item $definition)
+    protected function addItemDefinition(Value $definition)
     {
         $id = $definition->id;
+
+        // Throw exception if item already defied
         if ($this->has($id)) {
             throw new AlreadyDefinedException("Item '{$id}' already defined.");
         }
+
+        // Initialize item controller, use controller from definition if exists
         $this->items[$id] = $definition->controller ?: new ItemController($definition);
+
+        // Add Relation if needed
+        if ($definition instanceof Item && $definition->relation) {
+            $this->addDefinition($definition->relation);
+        }
+
+        // initialize item if it's a dependency of already initialized items
         if ($this->relationController->hasInitializedDependantFrom($id)) {
             $this->relationController->initialize($id, null);
         }

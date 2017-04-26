@@ -3,7 +3,7 @@
 namespace Nayjest\DI\Test\Integration;
 
 use Nayjest\DI\Hub;
-use Nayjest\DI\Definition\Item;
+use Nayjest\DI\Definition\Value;
 use Nayjest\DI\Definition\Relation;
 use Nayjest\DI\SubHub;
 use PHPUnit\Framework\TestCase;
@@ -51,7 +51,7 @@ class SubHubTest extends TestCase
         $this->assertEquals('val', $subHub->get("item"));
         $this->assertEquals('val', $hub->get("item"));
         $subHub->addDefinitions([
-            new Item('item2', null),
+            new Value('item2', null),
             new Relation('item2', 'item', function (&$target, $src) {
                 $target = "$src!";
             })
@@ -73,7 +73,7 @@ class SubHubTest extends TestCase
         $this->assertEquals('val', $subHub->get("item"));
         $this->assertEquals('val', $externalHub->get("s.item"));
         $subHub->addDefinitions([
-            new Item('item2', null),
+            new Value('item2', null),
             new Relation('item2', 'item', function (&$target, $src) {
                 $target = "$src!";
             })
@@ -154,8 +154,8 @@ class SubHubTest extends TestCase
     {
 
         $internalHub = new Hub([
-            new Item('inner', 'val'),
-            new Item('inner_dependant'),
+            new Value('inner', 'val'),
+            new Value('inner_dependant'),
             new Relation('inner_dependant', 'inner', function (&$target, $source) {
                 $target = $source . '[i-i-rel]';
             })
@@ -167,8 +167,8 @@ class SubHubTest extends TestCase
         $subHub = new SubHub("$id.", $internalHub, $externalHub);
 
         $externalHub->addDefinitions([
-            new Item('outer'),
-            new Item('outer2'),
+            new Value('outer'),
+            new Value('outer2'),
             new Relation('outer', "$id.inner_dependant", function (&$target, $source) {
                 $target = $source . '[e-i-rel]';
             }),
@@ -204,7 +204,7 @@ class SubHubTest extends TestCase
         $externalHub = new Hub;
         $internalHub = new Hub;
 
-        $internalHub->addDefinition(new Item('item_i', 'val'));
+        $internalHub->addDefinition(new Value('item_i', 'val'));
 
         $subHub = new SubHub("$id.", $internalHub);
         $subHub->register($externalHub);

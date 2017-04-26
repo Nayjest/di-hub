@@ -3,7 +3,7 @@
 namespace Nayjest\DI\Test\Integration;
 
 use Nayjest\DI\Hub;
-use Nayjest\DI\Definition\Item;
+use Nayjest\DI\Definition\Value;
 use Nayjest\DI\HubInterface;
 use Nayjest\DI\SubHub;
 use PHPUnit\Framework\TestCase;
@@ -40,18 +40,18 @@ class SubSubHubTestDescBuild extends TestCase
         $this->h2 = new Hub;
         $this->h3 = new Hub;
         $this->h4 = new Hub;
-        $this->h3->addDefinition(new Item('eb', 'eb'));
-        $this->h3->addDefinition(new Item('e', 'e'));
-        $this->h1->addDefinition(new Item('ib', 'ib'));
-        $this->h1->addDefinition(new Item('i', 'i'));
+        $this->h3->addDefinition(new Value('eb', 'eb'));
+        $this->h3->addDefinition(new Value('e', 'e'));
+        $this->h1->addDefinition(new Value('ib', 'ib'));
+        $this->h1->addDefinition(new Value('i', 'i'));
 
 
         $this->sh3 = new SubHub('h3.', $this->h3, $this->h4);
         $this->sh2 = new SubHub('h2.',$this->h2,$this->sh3);
         $this->sh1 = new SubHub('h1.',$this->h1,$this->sh2);
 
-        $this->sh1->addDefinition(new Item('ia', 'ia'));
-        $this->sh3->addDefinition(new Item('ea', 'ea'));
+        $this->sh1->addDefinition(new Value('ia', 'ia'));
+        $this->sh3->addDefinition(new Value('ea', 'ea'));
         $this->dotSrc = function(&$t, $s, $p) {
             if ($p){
                 $t = str_replace(".$p", '', $t);

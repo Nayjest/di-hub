@@ -5,7 +5,7 @@ namespace Nayjest\DI\Test\Unit;
 use Nayjest\DI\Definition\DefinitionInterface;
 use Nayjest\DI\Definition\Relation;
 use Nayjest\DI\Exception\UnsupportedDefinitionTypeException;
-use Nayjest\DI\Definition\Item;
+use Nayjest\DI\Definition\Value;
 use Nayjest\DI\Exception\AlreadyDefinedException;
 use Nayjest\DI\Exception\NotFoundException;
 use Nayjest\DI\Hub;
@@ -43,12 +43,12 @@ class HubTest extends TestCase
     /**
      * @param string $id
      * @param null $value
-     * @return PHPUnit_Framework_MockObject_MockObject|\Nayjest\DI\Definition\Item
+     * @return PHPUnit_Framework_MockObject_MockObject|\Nayjest\DI\Definition\Value
      */
     protected function mockItemDefinition($id, $value = null)
     {
-        /** @var PHPUnit_Framework_MockObject_MockObject|Item $definition */
-        $definition = $this->createMock(Item::class);
+        /** @var PHPUnit_Framework_MockObject_MockObject|Value $definition */
+        $definition = $this->createMock(Value::class);
         $definition->id = $id;
         $definition->relations = [];
         if ($value!== null) {

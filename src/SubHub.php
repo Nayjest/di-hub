@@ -3,7 +3,7 @@
 namespace Nayjest\DI;
 
 use Nayjest\DI\Definition\DefinitionInterface;
-use Nayjest\DI\Definition\Item;
+use Nayjest\DI\Definition\Value;
 use Nayjest\DI\Definition\Relation;
 use Nayjest\DI\Internal\AbstractHub;
 use Nayjest\DI\Internal\ItemControllerWrapper;
@@ -59,7 +59,7 @@ class SubHub extends HubWrapper
     {
         $this->externalHub = $externalHub;
         $this->replaceExternalHubsToThis();
-        $externalHub->addDefinition(new Item($this->getId(), $this));
+        $externalHub->addDefinition(new Value($this->getId(), $this));
         foreach ($this->hub->getIds() as $id) {
             $this->exposeItem($id);
         }
@@ -100,7 +100,7 @@ class SubHub extends HubWrapper
     public function addDefinition(DefinitionInterface $definition)
     {
         parent::addDefinition($definition);
-        if ($this->externalHub && $definition instanceof Item) {
+        if ($this->externalHub && $definition instanceof Value) {
             $this->exposeItem($definition->id);
         }
         return $this;
@@ -113,11 +113,11 @@ class SubHub extends HubWrapper
 
     /**
      * @param $internalId
-     * @return Item
+     * @return Value
      */
     protected function makeExternalItemDefinition($internalId)
     {
-        $definition = new Item($this->prefixedId($internalId));
+        $definition = new Value($this->prefixedId($internalId));
         $definition->controller = new ItemControllerWrapper($internalId, $this->hub);
         return $definition;
     }
@@ -129,7 +129,7 @@ class SubHub extends HubWrapper
         $this->hub->addDefinition($this->makeExternalInitCallerRelation($itemDefinition));
     }
 
-    protected function makeExternalInitCallerRelation(Item $item)
+    protected function makeExternalInitCallerRelation(Value $item)
     {
         /** @var ItemControllerWrapper $wrapper */
         $wrapper = $item->controller;

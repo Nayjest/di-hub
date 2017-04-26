@@ -4,7 +4,7 @@ namespace Nayjest\DI\Builder;
 
 use Nayjest\DI\Definition\DefinitionInterface;
 use Nayjest\DI\Exception\DefinitionBuilderException;
-use Nayjest\DI\Definition\Item;
+use Nayjest\DI\Definition\Value;
 use Nayjest\DI\Definition\Relation;
 
 abstract class AbstractDefinitionBuilder
@@ -27,7 +27,7 @@ abstract class AbstractDefinitionBuilder
 
     final public function define($id, $source = null, $readonly = false)
     {
-        $this->addDefinition(new Item($id, $source, $readonly));
+        $this->addDefinition(new Value($id, $source, $readonly));
         $this->currentItemId = $id;
         return $this;
     }

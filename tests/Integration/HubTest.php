@@ -5,7 +5,7 @@ namespace Nayjest\DI\Test\Integration;
 use Nayjest\DI\Exception\CanNotRemoveDefinitionException;
 use Nayjest\DI\Exception\NotFoundException;
 use Nayjest\DI\Exception\ReadonlyException;
-use Nayjest\DI\Definition\Item;
+use Nayjest\DI\Definition\Value;
 use Nayjest\DI\Hub;
 use Nayjest\DI\Definition\Relation;
 use PHPUnit\Framework\TestCase;
@@ -15,11 +15,11 @@ class HubTest extends TestCase
     public function testAddItemDefinitions()
     {
         $hub = new Hub();
-        $d1 = new Item('item1');
+        $d1 = new Value('item1');
         $d1->source = function () {
             return 1;
         };
-        $d2 = new Item('item2');
+        $d2 = new Value('item2');
         $d2->source = 2;
         $hub->addDefinitions([$d1, $d2]);
         $this->assertEquals(1, $hub->get('item1'));
@@ -29,7 +29,7 @@ class HubTest extends TestCase
     public function testSet()
     {
         $hub = new Hub();
-        $hub->addDefinition(new Item('item1', 'initial_value'));
+        $hub->addDefinition(new Value('item1', 'initial_value'));
         $hub->set('item1', 'new_value');
         $this->assertEquals('new_value', $hub->get('item1'));
     }
@@ -40,10 +40,10 @@ class HubTest extends TestCase
             $item2 += $item1 - ($old ?: 0);
         };
         $hub = new Hub();
-        $d1 = new Item('added', function () {
+        $d1 = new Value('added', function () {
             return 1;
         });
-        $d2 = new Item('final', 10);
+        $d2 = new Value('final', 10);
 
         $rel1 = new Relation('final', 'added', $addFunc);
         $hub->addDefinitions([$d1, $d2, $rel1]);
@@ -59,7 +59,7 @@ class HubTest extends TestCase
         $this->assertEquals(2, $hub->get('added'));
 
         # assert 2 level rel. works when added later
-        $d3 = new Item('added2', 3);
+        $d3 = new Value('added2', 3);
         $rel2 = new Relation('added', 'added2', $addFunc);
         $hub->addDefinitions([$d3, $rel2]);
 
@@ -82,7 +82,7 @@ class HubTest extends TestCase
     {
 
         $hub = new Hub();
-        $d1 = new Item('item', 2);
+        $d1 = new Value('item', 2);
         $rel = new Relation('item', null, function (&$val) {
             $val++;
         });
@@ -96,7 +96,7 @@ class HubTest extends TestCase
     public function testEmptyRelationTarget()
     {
         $hub = new Hub();
-        $d1 = new Item('item', 2);
+        $d1 = new Value('item', 2);
         $i = 1;
         $rel = new Relation(null, 'item', function ($target, $src) use (&$i) {
             $this->assertEquals(null, $target);
@@ -114,7 +114,7 @@ class HubTest extends TestCase
     {
         $this->expectException(ReadonlyException::class);
         $hub = new Hub();
-        $item = new Item('item', 2, true);
+        $item = new Value('item', 2, true);
         $hub->addDefinition($item);
         $hub->set('item', 3);
     }
@@ -162,10 +162,10 @@ class HubTest extends TestCase
             $target = $target. "[$src]";
         };
         $hub = new Hub([
-            new Item('root', 'Root'),
-            new Item('a', 'A'),
-            new Item('c', 'C'),
-            new Item('b', 'B'),
+            new Value('root', 'Root'),
+            new Value('a', 'A'),
+            new Value('c', 'C'),
+            new Value('b', 'B'),
             new Relation('root', 'a', $handler),
             new Relation('a', 'c', $handler),
             new Relation('root', 'b', $handler),
@@ -195,7 +195,7 @@ class HubTest extends TestCase
     public function testImmediateItemInitialization()
     {
         $hub = new Hub([
-            new Item('target', 'initial_target_val'),
+            new Value('target', 'initial_target_val'),
         ]);
         $hub->get('target');
         $calls = 0;
@@ -210,8 +210,8 @@ class HubTest extends TestCase
     public function testImmediateRelationHandle()
     {
         $hub = new Hub([
-            new Item('target', 'initial_target_val'),
-            new Item('src', 'initial_src_val'),
+            new Value('target', 'initial_target_val'),
+            new Value('src', 'initial_src_val'),
         ]);
         $hub->get('target');
         $hub->get('src');

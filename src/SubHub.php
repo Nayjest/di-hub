@@ -2,9 +2,11 @@
 
 namespace Nayjest\DI;
 
+use Closure;
 use Nayjest\DI\Definition\DefinitionInterface;
 use Nayjest\DI\Definition\Value;
 use Nayjest\DI\Definition\Relation;
+use Nayjest\DI\Exception\InternalErrorException;
 use Nayjest\DI\Internal\AbstractHub;
 use Nayjest\DI\Internal\ItemControllerWrapper;
 use SplObjectStorage;
@@ -28,7 +30,7 @@ class SubHub extends HubWrapper
      */
     private static $subHubs;
 
-    /** @var string */
+    /** @var string|Closure */
     private $prefix;
 
     /** @var  AbstractHub */
@@ -37,7 +39,7 @@ class SubHub extends HubWrapper
     /**
      * SubHub constructor.
      *
-     * @param string $namePrefix
+     * @param string|Closure $namePrefix
      * @param AbstractHub $internalHub
      * @param AbstractHub|null $externalHub
      */
@@ -68,9 +70,9 @@ class SubHub extends HubWrapper
     /**
      * @return string
      */
-    public function getId()
+    protected function getId()
     {
-        return $this->prefix . 'hub';
+        return $this->prefixedId('hub');
     }
 
     /**
@@ -106,9 +108,19 @@ class SubHub extends HubWrapper
         return $this;
     }
 
+    /**
+     * @param string $id
+     * @return string
+     */
     protected function prefixedId($id)
     {
-        return ($id === null) ? null : $this->prefix . $id;
+        if (is_string($this->prefix)) {
+            return $this->prefix . $id;
+        } elseif(is_callable($this->prefix)) {
+            return call_user_func($this->prefix, $id);
+        } else {
+            throw new InternalErrorException("Invalid SubHub prefix");
+        }
     }
 
     /**

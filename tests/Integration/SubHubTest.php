@@ -2,6 +2,7 @@
 
 namespace Nayjest\DI\Test\Integration;
 
+use Nayjest\DI\Definition\Item;
 use Nayjest\DI\Hub;
 use Nayjest\DI\Definition\Value;
 use Nayjest\DI\Definition\Relation;
@@ -228,5 +229,18 @@ class SubHubTest extends TestCase
         $this->assertEquals('updated2.2', $externalHub->get("$id.item_i"));
         $this->assertEquals('updated2.2', $subHub->get("item_i"));
         $this->assertEquals('updated2.2', $internalHub->get("item_i"));
+    }
+
+    public function testClosurePrefix()
+    {
+        $e = new Hub();
+        $i = new Hub([
+            new Item('id', 'val')
+        ]);
+        $prefix = function ($id) {
+            return 'internal' . ucfirst($id);
+        };
+        new SubHub($prefix, $i, $e);
+        $this->assertEquals('val', $e->get('internalId'));
     }
 }

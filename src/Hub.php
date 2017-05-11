@@ -7,6 +7,7 @@ use Nayjest\DI\Definition\Value;
 use Nayjest\DI\Definition\Relation;
 use Nayjest\DI\Exception\AlreadyDefinedException;
 use Nayjest\DI\Exception\CanNotRemoveDefinitionException;
+use Nayjest\DI\Exception\InternalErrorException;
 use Nayjest\DI\Exception\NotFoundException;
 use Nayjest\DI\Exception\UnsupportedDefinitionTypeException;
 use Nayjest\DI\Internal\AbstractHub;
@@ -158,18 +159,29 @@ class Hub extends AbstractHub
     }
 
     /**
-     * Removes item from hub.
+     * Removes definition from hub.
      *
-     * @param string $id
+     * @param string|DefinitionInterface $target definition instance or id
      * @return $this
      */
-    public function remove($id)
+    public function remove($target)
     {
-        $canRemove = !$this->getItem($id)->isInitialized() && $this->relationController->canRemove($id);
+        if ($target instanceof DefinitionInterface) {
+            if ($target instanceof Relation) {
+                $this->relationController->removeRelation($target);
+                return $this;
+            } elseif ($target instanceof Value) {
+                $target = $target->id;
+            } else {
+                throw new InternalErrorException("Can't remove definition");
+            }
+        }
+
+        $canRemove = !$this->getItem($target)->isInitialized() && $this->relationController->canRemove($target);
         if (!$canRemove) {
             throw new CanNotRemoveDefinitionException;
         }
-        unset($this->items[$id]);
+        unset($this->items[$target]);
         return $this;
     }
 

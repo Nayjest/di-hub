@@ -69,4 +69,10 @@ class HubWrapper extends AbstractHub
     {
         return $this->hub->isInitialized($id);
     }
+
+    public function remove($target)
+    {
+        $this->hub->remove($target);
+        return $this;
+    }
 }

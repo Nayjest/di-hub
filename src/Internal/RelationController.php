@@ -49,6 +49,15 @@ class RelationController
         }
     }
 
+    public function removeRelation(Relation $definition)
+    {
+        $index = array_search($definition, $this->relations, true);
+        if ($index === false) {
+            throw new NotFoundException("Relation not found, can't remove it.");
+        }
+        unset($this->relations[$index]);
+    }
+
     public function initialize($id, $prevValue, Relation $fromRelation = null)
     {
         $this->items[$id]->initialize();

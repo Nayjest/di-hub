@@ -46,4 +46,12 @@ interface HubInterface extends ContainerInterface
      * @return string[]
      */
     public function getIds();
+
+    /**
+     * Removes definition from hub.
+     *
+     * @param string|DefinitionInterface $target definition instance or id
+     * @return $this
+     */
+    public function remove($target);
 }

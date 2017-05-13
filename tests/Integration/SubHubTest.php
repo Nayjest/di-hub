@@ -271,7 +271,7 @@ class SubHubTest extends TestCase
         $s->addDefinition(new Item('i4', ['eSrc', 'eTarget'], function(&$t, $eSrc, $eTarget){
             $t = $eSrc . '.' . $eTarget;
         }));
-        //$this->assertEquals('i1.E', $e->get('i.i1'));
+        $this->assertEquals('I1.E', $e->get('i.i1'));
         $this->assertEquals('I2.E', $e->get('i.i2'));
         $this->assertEquals('E.I3', $e->get('eTarget'));
     }

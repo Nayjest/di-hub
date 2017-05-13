@@ -243,4 +243,36 @@ class SubHubTest extends TestCase
         new SubHub($prefix, $i, $e);
         $this->assertEquals('val', $e->get('internalId'));
     }
+
+    public function testExternalRelation()
+    {
+        $e = new Hub([
+            new Value('eSrc', 'E'),
+            new Value('eTarget', 'E')
+        ]);
+        $i = new Hub([
+            new Value('i1', 'I1'),
+            new Value('i2', 'I2'),
+            new Value('i3', 'I3'),
+        ]);
+        $s = new SubHub('i.', $i);
+        $r1 = new Relation('i1', SubHub::externalItemId('eSrc'), function(&$t,$s) {
+            $t.=".$s";
+        });
+        $r2 = new Relation('i2', SubHub::externalItemId('eSrc'), function(&$t,$s) {
+            $t.=".$s";
+        });
+        $r3 = new Relation(SubHub::externalItemId('eTarget'),'i3', function(&$t,$s) {
+            $t.=".$s";
+        });
+        $s->addDefinition($r1);
+        $s->register($e);
+        $s->addDefinitions([$r2, $r3]);
+        $s->addDefinition(new Item('i4', ['eSrc', 'eTarget'], function(&$t, $eSrc, $eTarget){
+            $t = $eSrc . '.' . $eTarget;
+        }));
+        //$this->assertEquals('i1.E', $e->get('i.i1'));
+        $this->assertEquals('I2.E', $e->get('i.i2'));
+        $this->assertEquals('E.I3', $e->get('eTarget'));
+    }
 }

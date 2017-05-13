@@ -25,6 +25,8 @@ use SplObjectStorage;
  */
 class SubHub extends HubWrapper
 {
+    const EXTERNAL_RELATION_ITEM_PREFIX = '@';
+
     /**
      * @var SplObjectStorage SubHubs indexed by its external hubs
      */
@@ -35,6 +37,25 @@ class SubHub extends HubWrapper
 
     /** @var  AbstractHub */
     protected $externalHub;
+
+    /**
+     * Relations having target or source in external hub.
+     * ID's of external items must be prefixed by '@' in relation to recognize it as external.
+     *
+     * @var Relation[]
+     */
+    protected $externalRelations = [];
+
+    /**
+     * Makes identifier of item from external hub for external relations.
+     *
+     * @param string $id
+     * @return string
+     */
+    public static function externalItemId($id)
+    {
+        return self::EXTERNAL_RELATION_ITEM_PREFIX . $id;
+    }
 
     /**
      * SubHub constructor.
@@ -64,6 +85,9 @@ class SubHub extends HubWrapper
         $externalHub->addDefinition(new Value($this->getId(), $this));
         foreach ($this->hub->getIds() as $id) {
             $this->exposeItem($id);
+        }
+        foreach($this->externalRelations as $relation) {
+            $this->exposeExternalRelation($relation);
         }
     }
 
@@ -101,11 +125,53 @@ class SubHub extends HubWrapper
      */
     public function addDefinition(DefinitionInterface $definition)
     {
+        if ($this->isExternalRelation($definition)) {
+            /** @var Relation $definition */
+            $this->addExternalRelation($definition);
+            return $this;
+        }
         parent::addDefinition($definition);
         if ($this->externalHub && $definition instanceof Value) {
             $this->exposeItem($definition->id);
         }
         return $this;
+    }
+
+    protected function isExternalRelation(DefinitionInterface $definition)
+    {
+        return $definition instanceof Relation && (
+            strpos($definition->target, self::EXTERNAL_RELATION_ITEM_PREFIX) === 0
+            || (
+                is_string($definition->source) &&
+                strpos($definition->source, self::EXTERNAL_RELATION_ITEM_PREFIX) === 0
+            )
+        );
+    }
+
+    protected function addExternalRelation(Relation $definition)
+    {
+        parent::addDefinition($definition);
+        if (!$this->externalHub) {
+            $this->externalRelations[] = $definition;
+        } else {
+            $this->exposeExternalRelation($definition);
+        }
+    }
+
+    protected function exposeExternalRelation(Relation $definition)
+    {
+        $this->hub->remove($definition);
+        if (strpos($definition->target, self::EXTERNAL_RELATION_ITEM_PREFIX) === 0) {
+            $definition->target = substr($definition->target, 1);
+        } else {
+            $definition->target = $this->prefixedId($definition->target);
+        }
+        if (strpos($definition->source, self::EXTERNAL_RELATION_ITEM_PREFIX) === 0) {
+            $definition->source = substr($definition->source, 1);
+        } else {
+            $definition->source = $this->prefixedId($definition->source);
+        }
+        $this->externalHub->addDefinition($definition);
     }
 
     /**
@@ -116,7 +182,7 @@ class SubHub extends HubWrapper
     {
         if (is_string($this->prefix)) {
             return $this->prefix . $id;
-        } elseif(is_callable($this->prefix)) {
+        } elseif (is_callable($this->prefix)) {
             return call_user_func($this->prefix, $id);
         } else {
             throw new InternalErrorException("Invalid SubHub prefix");

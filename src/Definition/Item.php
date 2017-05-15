@@ -27,6 +27,6 @@ class Item extends Value implements DefinitionInterface
         } else {
             $source = $sourceDependencies;
         }
-        parent::__construct($id, $source);
+        parent::__construct($id, $source, $handler ? self::FLAG_READONLY : 0);
     }
 }

@@ -86,7 +86,7 @@ class SubHub extends HubWrapper
         foreach ($this->hub->getIds() as $id) {
             $this->exposeItem($id);
         }
-        foreach($this->externalRelations as $relation) {
+        foreach ($this->externalRelations as $relation) {
             $this->exposeExternalRelation($relation);
         }
     }

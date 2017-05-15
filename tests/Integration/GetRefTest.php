@@ -28,7 +28,7 @@ class GetRefTest extends TestCase
 
         // THIS OPERATION IS NOT ALLOWED
         // CONSIDER ITEMS EXTRACTED BY REFERENCE READONLY,
-        // CHAGE VALUES ONLY VIA HUB
+        // CHANGE VALUES ONLY VIA HUB
         $ref = 3;
         $this->assertEquals(3, $hub->get('item'));
     }

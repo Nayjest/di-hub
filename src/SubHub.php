@@ -4,6 +4,7 @@ namespace Nayjest\DI;
 
 use Closure;
 use Nayjest\DI\Definition\DefinitionInterface;
+use Nayjest\DI\Definition\Item;
 use Nayjest\DI\Definition\Value;
 use Nayjest\DI\Definition\Relation;
 use Nayjest\DI\Exception\InternalErrorException;
@@ -125,32 +126,58 @@ class SubHub extends HubWrapper
      */
     public function addDefinition(DefinitionInterface $definition)
     {
+        // Add item relation directly via sub-hub to process external relations
+        // and remove relation from item to avoid adding it to internal hub
+        if ($definition instanceof Item && $definition->relation) {
+            $this->addDefinition($definition->relation);
+            $definition->relation = null;
+        }
+
         if ($this->isExternalRelation($definition)) {
             /** @var Relation $definition */
             $this->addExternalRelation($definition);
             return $this;
         }
+
         parent::addDefinition($definition);
+
         if ($this->externalHub && $definition instanceof Value) {
             $this->exposeItem($definition->id);
         }
+
         return $this;
+    }
+
+    protected function isExternalRelationField($field)
+    {
+        return strpos($field, self::EXTERNAL_RELATION_ITEM_PREFIX) === 0;
     }
 
     protected function isExternalRelation(DefinitionInterface $definition)
     {
-        return $definition instanceof Relation && (
-            strpos($definition->target, self::EXTERNAL_RELATION_ITEM_PREFIX) === 0
-            || (
-                is_string($definition->source) &&
-                strpos($definition->source, self::EXTERNAL_RELATION_ITEM_PREFIX) === 0
-            )
-        );
+        if (!$definition instanceof Relation) {
+            return false;
+        }
+        if ($this->isExternalRelationField($definition->target)) {
+            return true;
+        }
+        if ($definition->isMultiSource()) {
+            foreach ($definition->source as $src) {
+                if ($this->isExternalRelationField($src)) {
+                    return true;
+                }
+            }
+            return false;
+        } else {
+            return $this->isExternalRelationField($definition->source);
+        }
     }
 
     protected function addExternalRelation(Relation $definition)
     {
-        parent::addDefinition($definition);
+        if (!$definition->isMultiSource()) {
+            parent::addDefinition($definition);
+        }
         if (!$this->externalHub) {
             $this->externalRelations[] = $definition;
         } else {
@@ -158,18 +185,23 @@ class SubHub extends HubWrapper
         }
     }
 
+    protected function makeExternalRelationFieldId(&$field)
+    {
+        $field = $this->isExternalRelationField($field) ? substr($field, 1) : $this->prefixedId($field);
+    }
+
     protected function exposeExternalRelation(Relation $definition)
     {
-        $this->hub->remove($definition);
-        if (strpos($definition->target, self::EXTERNAL_RELATION_ITEM_PREFIX) === 0) {
-            $definition->target = substr($definition->target, 1);
-        } else {
-            $definition->target = $this->prefixedId($definition->target);
+        if (!$definition->isMultiSource()) {
+            $this->hub->remove($definition);
         }
-        if (strpos($definition->source, self::EXTERNAL_RELATION_ITEM_PREFIX) === 0) {
-            $definition->source = substr($definition->source, 1);
+        $this->makeExternalRelationFieldId($definition->target);
+        if ($definition->isMultiSource()) {
+            foreach ($definition->source as &$source) {
+                $this->makeExternalRelationFieldId($source);
+            }
         } else {
-            $definition->source = $this->prefixedId($definition->source);
+            $this->makeExternalRelationFieldId($definition->source);
         }
         $this->externalHub->addDefinition($definition);
     }

@@ -48,7 +48,7 @@ class Hub extends AbstractHub
         if ($definition instanceof Value) {
             $this->addItemDefinition($definition);
         } elseif ($definition instanceof Relation) {
-            if (is_array($definition->source)) {
+            if ($definition->isMultiSource()) {
                 $this->makeMultiSourceRelation($definition);
             } else {
                 $this->relationController->addRelation($definition);

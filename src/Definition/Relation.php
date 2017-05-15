@@ -24,4 +24,9 @@ class Relation implements DefinitionInterface
         $this->source = $source;
         $this->handler = $handler;
     }
+
+    public function isMultiSource()
+    {
+        return is_array($this->source);
+    }
 }

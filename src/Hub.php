@@ -69,7 +69,7 @@ class Hub extends AbstractHub
             }
             return $data;
         };
-        $tempItem = new Value($tempItemName, $tempItemInitializer, Value::FLAG_PRIVATE);
+        $tempItem = new Value($tempItemName, $tempItemInitializer, Value::FLAG_READONLY);
 
         $tempToTargetHandler = function (&$target, $source) use ($multiSourceRelation) {
             $arguments = [

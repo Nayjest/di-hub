@@ -63,4 +63,9 @@ class ItemControllerWrapper implements ItemControllerInterface
         $this->internalHub->get($this->internalId);
         $this->initializingNow = false;
     }
+
+    public function isPrivate()
+    {
+        return $this->internalHub->isPrivate($this->internalId);
+    }
 }

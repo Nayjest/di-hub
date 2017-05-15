@@ -27,6 +27,9 @@ class ItemController implements ItemControllerInterface
         $this->definition = $definition;
     }
 
+    /**
+     * @return bool
+     */
     public function isInitialized()
     {
         return $this->initialized;
@@ -34,7 +37,7 @@ class ItemController implements ItemControllerInterface
 
     public function set($value)
     {
-        if ($this->definition->readonly) {
+        if ($this->definition->flags & Value::FLAG_READONLY) {
             throw new ReadonlyException("Can't modify {$this->definition->id}, it's marked as readonly.");
         }
         $this->definition->source = $this->wrapIfCallable($value);
@@ -54,6 +57,14 @@ class ItemController implements ItemControllerInterface
     {
         $this->value = $this->readSource();
         $this->initialized = true;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPrivate()
+    {
+        return (bool)($this->definition->flags & Value::FLAG_PRIVATE);
     }
 
     protected function readSource()

@@ -114,9 +114,22 @@ class HubTest extends TestCase
     {
         $this->expectException(ReadonlyException::class);
         $hub = new Hub();
-        $item = new Value('item', 2, true);
+        $item = new Value('item', 2, Value::FLAG_READONLY);
         $hub->addDefinition($item);
         $hub->set('item', 3);
+    }
+
+    public function testReadonlyRelation()
+    {
+        // Relations works for readonly
+        $hub = new Hub([
+            new Value('readonly', 1, Value::FLAG_READONLY),
+            new Value('item', 2),
+            new Relation('readonly', 'item', function (&$t, $s) {
+                $t += $s;
+            })
+        ]);
+        $this->assertEquals(3, $hub->get('readonly'));
     }
 
     public function testRemoveNonExisting()
@@ -149,8 +162,7 @@ class HubTest extends TestCase
             ->define('concat')
             ->uses('a', $f)
             ->uses('b', $f)
-            ->uses('c', $f)
-        ;
+            ->uses('c', $f);
         $this->assertEquals('ABC', $hub->get('concat'));
         $this->expectException(CanNotRemoveDefinitionException::class);
         $hub->remove('c');
@@ -158,8 +170,8 @@ class HubTest extends TestCase
 
     public function testRelationChain()
     {
-        $handler = function(&$target, $src) {
-            $target = $target. "[$src]";
+        $handler = function (&$target, $src) {
+            $target = $target . "[$src]";
         };
         $hub = new Hub([
             new Value('root', 'Root'),
@@ -199,7 +211,7 @@ class HubTest extends TestCase
         ]);
         $hub->get('target');
         $calls = 0;
-        $hub->builder()->defineRelation('target', 'src', function() use (&$calls){
+        $hub->builder()->defineRelation('target', 'src', function () use (&$calls) {
             $calls++;
         });
         $this->assertEquals(0, $calls);
@@ -218,7 +230,9 @@ class HubTest extends TestCase
         $calls = 0;
         $hub->addDefinition(new Relation(
             'target',
-            'src',function() use (&$calls){$calls++;}
+            'src', function () use (&$calls) {
+            $calls++;
+        }
         ));
         $this->assertEquals(1, $calls);
     }

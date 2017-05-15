@@ -21,4 +21,9 @@ interface ItemControllerInterface
     public function &get();
 
     public function initialize();
+
+    /**
+     * @return bool
+     */
+    public function isPrivate();
 }

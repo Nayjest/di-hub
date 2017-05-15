@@ -55,24 +55,51 @@ class HubWrapper extends AbstractHub
         return $this;
     }
 
+    /**
+     * @param string $id
+     * @return mixed
+     */
     public function &get($id)
     {
         return $this->hub->get($id);
     }
 
+    /**
+     * @param string $id
+     * @return bool
+     */
     public function has($id)
     {
         return $this->hub->has($id);
     }
 
+    /**
+     * @param string $id
+     * @return bool
+     */
     public function isInitialized($id)
     {
         return $this->hub->isInitialized($id);
     }
 
+    /**
+     * Removes definition from hub.
+     *
+     * @param string|DefinitionInterface $target definition instance or id
+     * @return $this
+     */
     public function remove($target)
     {
         $this->hub->remove($target);
         return $this;
+    }
+
+    /**
+     * @param string $id
+     * @return bool
+     */
+    public function isPrivate($id)
+    {
+        return $this->hub->isPrivate($id);
     }
 }

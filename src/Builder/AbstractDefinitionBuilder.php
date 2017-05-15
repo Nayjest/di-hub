@@ -25,9 +25,9 @@ abstract class AbstractDefinitionBuilder
         return $this;
     }
 
-    final public function define($id, $source = null, $readonly = false)
+    final public function define($id, $source = null, $flags = 0)
     {
-        $this->addDefinition(new Value($id, $source, $readonly));
+        $this->addDefinition(new Value($id, $source, $flags));
         $this->currentItemId = $id;
         return $this;
     }

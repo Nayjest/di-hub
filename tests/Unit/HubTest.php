@@ -4,6 +4,7 @@ namespace Nayjest\DI\Test\Unit;
 
 use Nayjest\DI\Definition\DefinitionInterface;
 use Nayjest\DI\Definition\Relation;
+use Nayjest\DI\Exception\PrivateException;
 use Nayjest\DI\Exception\UnsupportedDefinitionTypeException;
 use Nayjest\DI\Definition\Value;
 use Nayjest\DI\Exception\AlreadyDefinedException;
@@ -42,17 +43,19 @@ class HubTest extends TestCase
 
     /**
      * @param string $id
-     * @param null $value
+     * @param mixed $value
+     * @param int $flags
      * @return PHPUnit_Framework_MockObject_MockObject|\Nayjest\DI\Definition\Value
      */
-    protected function mockItemDefinition($id, $value = null)
+    protected function mockItemDefinition($id, $value = null, $flags = 0)
     {
         /** @var PHPUnit_Framework_MockObject_MockObject|Value $definition */
         $definition = $this->createMock(Value::class);
         $definition->id = $id;
         $definition->relations = [];
-        if ($value!== null) {
-            $definition->source = function() use($value) {
+        $definition->flags = $flags;
+        if ($value !== null) {
+            $definition->source = function () use ($value) {
                 return $value;
             };
         }
@@ -120,7 +123,7 @@ class HubTest extends TestCase
         $relation->source = 'src';
         $relation->target = 'initialized_target';
         $callLog = [];
-        $relation->handler = function(&$target, $source, $prev) use (&$callLog) {
+        $relation->handler = function (&$target, $source, $prev) use (&$callLog) {
             $callLog[] = "target:$target|src:$source|prev:$prev";
         };
 
@@ -174,5 +177,44 @@ class HubTest extends TestCase
         ]);
         $this->expectException(NotFoundException::class);
         $this->hub->get('target');
+    }
+
+    protected function preparePrivateItemTest()
+    {
+        /** @var Relation $relation */
+        $relation = $this->createMock(Relation::class);
+        $relation->source = 'private';
+        $relation->target = 'public';
+        $relation->handler = function (&$t, $s) {
+            $t .= '|' . $s;
+        };
+
+        $this->hub->addDefinitions([
+            $this->mockItemDefinition('private', 'private_val', Value::FLAG_PRIVATE),
+            $this->mockItemDefinition('public', 'public_val'),
+        ]);
+        $this->assertEquals('public_val', $this->hub->get('public'));
+        $this->assertTrue($this->hub->has('private'));
+        $this->hub->addDefinition($relation);
+    }
+
+    public function testPrivateRelation()
+    {
+        $this->preparePrivateItemTest();
+        $this->assertEquals('public_val|private_val', $this->hub->get('public'));
+    }
+
+    public function testPrivateGet()
+    {
+        $this->preparePrivateItemTest();
+        $this->expectException(PrivateException::class);
+        $this->hub->get('private');
+    }
+
+    public function testPrivateSet()
+    {
+        $this->preparePrivateItemTest();
+        $this->expectException(PrivateException::class);
+        $this->hub->set('private', 'new_val');
     }
 }

@@ -103,7 +103,7 @@ class SubHubTest extends TestCase
             ->usedBy('title', function (&$target, $src) {
                 $target = ucfirst($src);
             })
-            ->define('title', null, true);
+            ->define('title', null);
 
         $subHub = new SubHub("$id.", $internalHub);
         $subHub->register($externalHub);
@@ -128,7 +128,7 @@ class SubHubTest extends TestCase
         $subHub->register($externalHub);
 
         $externalHub->builder()
-            ->define('final', null, true)
+            ->define('final', null)
             ->uses(
                 "$id.item",
                 function (&$target, $src) {
@@ -256,19 +256,19 @@ class SubHubTest extends TestCase
             new Value('i3', 'I3'),
         ]);
         $s = new SubHub('i.', $i);
-        $r1 = new Relation('i1', SubHub::externalItemId('eSrc'), function(&$t,$s) {
-            $t.=".$s";
+        $r1 = new Relation('i1', SubHub::externalItemId('eSrc'), function (&$t, $s) {
+            $t .= ".$s";
         });
-        $r2 = new Relation('i2', SubHub::externalItemId('eSrc'), function(&$t,$s) {
-            $t.=".$s";
+        $r2 = new Relation('i2', SubHub::externalItemId('eSrc'), function (&$t, $s) {
+            $t .= ".$s";
         });
-        $r3 = new Relation(SubHub::externalItemId('eTarget'),'i3', function(&$t,$s) {
-            $t.=".$s";
+        $r3 = new Relation(SubHub::externalItemId('eTarget'), 'i3', function (&$t, $s) {
+            $t .= ".$s";
         });
         $s->addDefinition($r1);
         $s->register($e);
         $s->addDefinitions([$r2, $r3]);
-        $s->addDefinition(new Item('i4', ['eSrc', 'eTarget'], function(&$t, $eSrc, $eTarget){
+        $s->addDefinition(new Item('i4', ['eSrc', 'eTarget'], function (&$t, $eSrc, $eTarget) {
             $t = $eSrc . '.' . $eTarget;
         }));
         $this->assertEquals('I1.E', $e->get('i.i1'));

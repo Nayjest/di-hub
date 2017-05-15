@@ -9,10 +9,13 @@ use Nayjest\DI\Internal\ItemControllerInterface;
  */
 class Value implements DefinitionInterface
 {
+    const FLAG_PRIVATE = 1;
+    const FLAG_READONLY = 2;
+
     /** @var  string */
     public $id;
 
-    public $readonly = false;
+    public $flags;
 
     /**
      * If item source is callable, it's result will be used as value.
@@ -32,12 +35,22 @@ class Value implements DefinitionInterface
      * ItemDefinition constructor.
      * @param $id
      * @param mixed|callable $source
-     * @param bool $readonly
+     * @param int $flags
      */
-    public function __construct($id, $source = null, $readonly = false)
+    public function __construct($id, $source = null, $flags = 0)
     {
         $this->id = $id;
         $this->source = $source;
-        $this->readonly = $readonly;
+        $this->flags = $flags;
+    }
+
+    /**
+     * @param int $flags
+     * @return Value
+     */
+    public function setFlags($flags)
+    {
+        $this->flags = $flags;
+        return $this;
     }
 }

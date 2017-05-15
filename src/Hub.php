@@ -9,6 +9,7 @@ use Nayjest\DI\Exception\AlreadyDefinedException;
 use Nayjest\DI\Exception\CanNotRemoveDefinitionException;
 use Nayjest\DI\Exception\InternalErrorException;
 use Nayjest\DI\Exception\NotFoundException;
+use Nayjest\DI\Exception\PrivateException;
 use Nayjest\DI\Exception\UnsupportedDefinitionTypeException;
 use Nayjest\DI\Internal\AbstractHub;
 use Nayjest\DI\Internal\ItemController;
@@ -61,30 +62,31 @@ class Hub extends AbstractHub
     protected function makeMultiSourceRelation(Relation $multiSourceRelation)
     {
         $tempItemName = self::INTERNAL_DEFINITION_PREFIX . rand(1, PHP_INT_MAX - 1);
-        $tempItem = new Value($tempItemName, function () use ($multiSourceRelation) {
+        $tempItemInitializer = function () use ($multiSourceRelation) {
             $data = [];
             foreach ($multiSourceRelation->source as $sourceName) {
                 $data[$sourceName] = $this->get($sourceName);
             }
             return $data;
-        });
-        $tmpToTargetRelation = new Relation(
-            $multiSourceRelation->target,
-            $tempItemName,
-            function (&$target, $source) use ($multiSourceRelation) {
-                $arguments = [
-                    &$target
-                ];
-                foreach ($multiSourceRelation->source as $srcName) {
-                    $arguments[] = $source[$srcName];
-                }
-                call_user_func_array($multiSourceRelation->handler, $arguments);
+        };
+        $tempItem = new Value($tempItemName, $tempItemInitializer, Value::FLAG_PRIVATE);
+
+        $tempToTargetHandler = function (&$target, $source) use ($multiSourceRelation) {
+            $arguments = [
+                &$target
+            ];
+            foreach ($multiSourceRelation->source as $srcName) {
+                $arguments[] = $source[$srcName];
             }
-        );
+            call_user_func_array($multiSourceRelation->handler, $arguments);
+        };
+        $tempToTargetRelation = new Relation($multiSourceRelation->target, $tempItemName, $tempToTargetHandler);
+
         $definitions = [
             $tempItem,
-            $tmpToTargetRelation
+            $tempToTargetRelation
         ];
+
         foreach ($multiSourceRelation->source as $srcName) {
             $relation = new Relation($tempItemName, $srcName, function (&$target, $src) use ($srcName) {
                 $target[$srcName] = $src;
@@ -103,6 +105,9 @@ class Hub extends AbstractHub
     public function &get($id)
     {
         $item = $this->getItem($id);
+        if ($item->isPrivate()) {
+            throw new PrivateException("Trying to read private value: $id");
+        }
         if (!$item->isInitialized()) {
             $this->relationController->initialize($id, null);
         }
@@ -121,7 +126,9 @@ class Hub extends AbstractHub
     public function set($id, $value)
     {
         $item = $this->getItem($id);
-
+        if ($item->isPrivate()) {
+            throw new PrivateException("Trying to set value of private item $id");
+        }
         if ($item->isInitialized()) {
             $prevVal = $item->get();
             $item->set($value);
@@ -183,6 +190,11 @@ class Hub extends AbstractHub
         }
         unset($this->items[$target]);
         return $this;
+    }
+
+    public function isPrivate($id)
+    {
+        return $this->getItem($id)->isPrivate();
     }
 
     protected function addItemDefinition(Value $definition)

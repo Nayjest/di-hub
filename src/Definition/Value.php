@@ -9,7 +9,15 @@ use Nayjest\DI\Internal\ItemControllerInterface;
  */
 class Value implements DefinitionInterface
 {
+    /**
+     * @todo looks like private values not works with sub-hubs, that much limits it's usage
+     */
     const FLAG_PRIVATE = 1;
+
+    /**
+     * Readonly item can't be modified via $hub->set()
+     * Readonly item still can be modified from relation.
+     */
     const FLAG_READONLY = 2;
 
     /** @var  string */

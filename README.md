@@ -1,5 +1,5 @@
 # DI-Hub (Dependency Injection Hub)
-IoC container for PHP with links consistency maintaining mechanism
+IoC container for PHP with hierarchy and links consistency maintaining mechanism
 
 [![Build Status](https://travis-ci.org/Nayjest/di-hub.svg?branch=master)](https://travis-ci.org/Nayjest/di-hub)
 
@@ -29,6 +29,70 @@ composer require nayjest/di-hub
 ```
 
 ## Usage
+
+### Creating hub
+Class Nayjest\DI\Hub represents IoC container. This class implements ContainerInterface from container-interop/container-interop package.
+
+Hub can be instantiated without arguments or with array containing definitions.
+```php
+use Nayjest\DI\Hub;
+# Empty hub
+$hub = new Hub;
+
+# Hub with definitions
+
+$hub = new Hub([
+  new Value('item1', $item1),
+  new Value('item2', $item2),
+  new Relation('item1', 'item2', $handler),
+]);
+
+```
+
+### Definitions
+
+There are several types of definitions that can be added to hub:
+- Values
+- Relations
+- Items
+
+Definitions should implement `Nayjest\DI\Definition\DefinitionInterface`.
+This intarface don't contains any methods, it's used only to signalize that instances of target class defines data or relations inside container.
+
+Definitions can be added to container(hub) in following ways:
+1) Inject array of definition instances into hub constructor
+2) Add definition instance to existing hub via `$hub->addDefinition(DefinitionInterface $definition)` 
+3) Add array of definition instances to existing hub via `$hub->addDefinitions(DefinitionInterface[] $definitions)`
+4) Create definitions via DefinitionBuilder: `$hub->builder()->define($id $source)`
+
+#### Value Definitions
+Instance of Nayjest\DI\Definition\Value represent single value in container that can be accessed by it's id.
+Nayjest\DI\Definition\Value accepts two arguments: id and source.
+source can contain value to store inside hub or callable that returns target value.
+
+```php
+# Add data directly to definition
+$hub->addDefinition(new Value('item1', $data));
+
+# Add data via callable
+$hub->addDefinition(new Value('item2', function(){
+   return $data;
+}));
+```
+#### Relation Definitions
+
+@todo
+
+#### Item Definitions
+
+Item is a combination of value & it's initial dependencies.
+May be useful to store class instances that require DI in constructor.
+
+@todo
+
+### Hierarchy of hubs
+
+@todo
 
 ## Testing
 

@@ -26,6 +26,7 @@ class Hub extends AbstractHub
 
     /**
      * Hub constructor.
+     *
      * @param DefinitionInterface[]|null $definitions
      */
     public function __construct(array $definitions = null)
@@ -116,7 +117,7 @@ class Hub extends AbstractHub
 
     /**
      * Set's item value.
-     * Throws exception if item isn't defined or has no setter.
+     * Throws exception if item isn't defined or is private or readonly.
      *
      * @api
      * @param string $id
@@ -142,6 +143,8 @@ class Hub extends AbstractHub
     /**
      * Returns true if hub contains item with specified ID, otherwise returns false.
      *
+     * Returns true for private items.
+     *
      * @api
      * @param string $id
      * @return bool
@@ -160,6 +163,11 @@ class Hub extends AbstractHub
         return $this->has($id) && $this->getItem($id)->isInitialized();
     }
 
+    /**
+     * Returns identifiers of items stored in hub.
+     *
+     * @return string[]
+     */
     public function getIds()
     {
         return array_keys($this->items);
@@ -192,11 +200,19 @@ class Hub extends AbstractHub
         return $this;
     }
 
+    /**
+     * Returns true if target item is private.
+     * @param string $id
+     * @return bool
+     */
     public function isPrivate($id)
     {
         return $this->getItem($id)->isPrivate();
     }
 
+    /**
+     * @param Value $definition
+     */
     protected function addItemDefinition(Value $definition)
     {
         $id = $definition->id;

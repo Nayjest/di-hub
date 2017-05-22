@@ -5,6 +5,9 @@ namespace Nayjest\DI;
 use Nayjest\DI\Definition\DefinitionInterface;
 use Nayjest\DI\Internal\AbstractHub;
 
+/**
+ * HubWrapper is a base class for hub wrappers/decorators.
+ */
 class HubWrapper extends AbstractHub
 {
     /**

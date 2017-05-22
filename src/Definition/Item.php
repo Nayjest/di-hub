@@ -4,6 +4,10 @@ namespace Nayjest\DI\Definition;
 
 /**
  * Item definition.
+ *
+ * Item is a combination of value & it's dependencies.
+ * May be useful to store class instances that require DI in constructor.
+ *
  */
 class Item extends Value implements DefinitionInterface
 {

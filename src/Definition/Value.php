@@ -20,7 +20,11 @@ class Value implements DefinitionInterface
      */
     const FLAG_READONLY = 2;
 
-    /** @var  string */
+    /**
+     * Identifier.
+     *
+     * @var  string
+     */
     public $id;
 
     public $flags;
